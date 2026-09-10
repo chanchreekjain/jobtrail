@@ -1,11 +1,22 @@
 "use server";
 
-import { extractRequirements } from "@/lib/ai/provider";
+import { extractRequirements, type Requirement } from "@/lib/ai/provider";
 
-export async function analyseJd(formData: FormData) {
+export type JdState = {
+  requirements: Requirement[];
+  error: string | null;
+};
+
+export async function analyseJd(_prev: JdState, formData: FormData): Promise<JdState> {
   const rawJd = String(formData.get("raw_jd") ?? "").trim();
-  if (!rawJd) return;
+  if (!rawJd) {
+    return { requirements: [], error: "Paste a job description first." };
+  }
 
-  const requirements = await extractRequirements(rawJd);
-  console.log(requirements);
+  try {
+    const requirements = await extractRequirements(rawJd);
+    return { requirements, error: null };
+  } catch {
+    return { requirements: [], error: "Extraction failed — the model may be busy. Try again." };
+  }
 }

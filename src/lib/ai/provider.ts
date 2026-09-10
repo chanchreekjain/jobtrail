@@ -1,5 +1,22 @@
 import { GoogleGenAI, Type } from "@google/genai";
 
+async function withRetry<T>(fn: () => Promise<T>, attempts = 3): Promise<T> {
+  let lastError: unknown;
+
+  for (let i = 0; i < attempts; i++) {
+    try {
+      return await fn();
+    } catch (error) {
+      lastError = error;
+      const status = (error as { status?: number }).status;
+      if (status !== 503 && status !== 429) throw error;
+      await new Promise((r) => setTimeout(r, 1000 * 2 ** i));
+    }
+  }
+
+  throw lastError;
+}
+
 if (!process.env.GEMINI_API_KEY) {
   throw new Error("GEMINI_API_KEY is not set");
 }
@@ -13,7 +30,7 @@ export type Requirement = {
 };
 
 export async function extractRequirements(rawJd: string): Promise<Requirement[]> {
-  const response = await ai.models.generateContent({
+  const response = await withRetry(() => ai.models.generateContent({
     model: "gemini-3.6-flash",
     contents: `Extract every requirement from this job description.
 For each one: the requirement text, whether it is a "must" or a "nice" to have,
@@ -36,7 +53,7 @@ ${rawJd}`,
         },
       },
     },
-  });
+  }));
 
   return JSON.parse(response.text ?? "[]") as Requirement[];
 }
