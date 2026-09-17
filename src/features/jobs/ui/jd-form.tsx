@@ -3,7 +3,7 @@
 import { useActionState } from "react";
 import { analyseJd, type JdState } from "../actions";
 
-const initialState: JdState = { requirements: [], error: null };
+const initialState: JdState = { requirements: [], error: null, cached: false };
 
 export function JdForm() {
   const [state, formAction, isPending] = useActionState(analyseJd, initialState);
@@ -20,6 +20,10 @@ export function JdForm() {
       </form>
 
       {state.error && <p className="text-red-500">{state.error}</p>}
+
+      {state.cached && (
+        <p className="text-sm text-gray-500">Loaded from database — no API call.</p>
+      )}
 
       <ul className="space-y-2">
         {state.requirements.map((r, i) => (
