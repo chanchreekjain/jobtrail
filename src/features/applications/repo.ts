@@ -10,6 +10,12 @@ export type Application = {
   created_at: string;
 };
 
+export type Counts = {
+  jobs: number;
+  applications: number;
+  applied: number;
+};
+
 export async function listApplications(): Promise<Application[]> {
   const rows = await sql`
     select
@@ -24,6 +30,16 @@ export async function listApplications(): Promise<Application[]> {
     order by created_at desc
   `;
   return rows as Application[];
+}
+
+export async function getCounts(): Promise<Counts> {
+  const rows = await sql`
+    select
+      (select count(*)::int from jobs)                               as jobs,
+      (select count(*)::int from applications)                       as applications,
+      (select count(*)::int from applications where status = 'applied') as applied
+  `;
+  return rows[0] as Counts;
 }
 
 export async function insertApplication(input: {

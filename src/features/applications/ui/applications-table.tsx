@@ -12,9 +12,14 @@ function todayLocal(): string {
 
 export function ApplicationsTable({ rows }: { rows: Application[] }) {
   const [isPending, startTransition] = useTransition();
+  const today = todayLocal();
 
   if (rows.length === 0) {
-    return <p className="text-gray-500">Nothing in your pipeline yet.</p>;
+    return (
+      <p className="text-gray-500">
+        Nothing here yet — paste a JD and save it to your pipeline.
+      </p>
+    );
   }
 
   return (
@@ -45,7 +50,7 @@ export function ApplicationsTable({ rows }: { rows: Application[] }) {
                     disabled={isPending}
                     onClick={() =>
                       startTransition(() =>
-                        toggleApplied(row.id, !applied, todayLocal()),
+                        toggleApplied(row.id, !applied, today),
                       )
                     }
                     className={`relative h-6 w-11 rounded-full transition-colors disabled:opacity-50 ${
@@ -63,14 +68,17 @@ export function ApplicationsTable({ rows }: { rows: Application[] }) {
                   {applied ? (
                     <input
                       type="date"
-                      defaultValue={row.applied_at ?? todayLocal()}
+                      max={today}
+                      defaultValue={row.applied_at ?? today}
                       disabled={isPending}
+                      onClick={(e) => e.currentTarget.showPicker?.()}
+                      onFocus={(e) => e.currentTarget.showPicker?.()}
                       onChange={(e) =>
                         startTransition(() =>
                           changeAppliedDate(row.id, e.target.value),
                         )
                       }
-                      className="border border-gray-400 rounded px-2 py-1 bg-transparent"
+                      className="border border-gray-400 rounded px-2 py-1 bg-transparent cursor-pointer"
                     />
                   ) : (
                     <span className="text-gray-400">—</span>

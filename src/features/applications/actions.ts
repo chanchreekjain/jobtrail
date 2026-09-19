@@ -10,6 +10,11 @@ import {
   updateAppliedDate,
 } from "./repo";
 
+function refresh() {
+  revalidatePath("/");
+  revalidatePath("/pipeline");
+}
+
 export async function addApplication(formData: FormData) {
   const company = String(formData.get("company") ?? "").trim();
   const role = String(formData.get("role") ?? "").trim();
@@ -23,7 +28,7 @@ export async function addApplication(formData: FormData) {
     source_url: sourceUrl || null,
   });
 
-  revalidatePath("/");
+  refresh();
 }
 
 export type PipelineState = { message: string | null };
@@ -41,27 +46,42 @@ export async function saveToPipeline(
   }
 
   await addToPipeline(jobId);
-  revalidatePath("/");
+  refresh();
 
   return { message: "Saved to pipeline." };
 }
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 
+/**
+ * A date is usable if it parses and is not in the future.
+ * We allow one day of slack because the browser's timezone can legitimately
+ * be ahead of UTC — a user in IST at 2am is on "tomorrow" by UTC reckoning.
+ */
+function isUsableDate(value: string): boolean {
+  if (!ISO_DATE.test(value)) return false;
+
+  const given = Date.parse(`${value}T00:00:00Z`);
+  if (Number.isNaN(given)) return false;
+
+  const tomorrow = Date.now() + 24 * 60 * 60 * 1000;
+  return given <= tomorrow;
+}
+
 export async function toggleApplied(id: string, applied: boolean, onDate: string) {
   if (applied) {
-    if (!ISO_DATE.test(onDate)) return;
+    if (!isUsableDate(onDate)) return;
     await markApplied(id, onDate);
   } else {
     await markNotApplied(id);
   }
 
-  revalidatePath("/");
+  refresh();
 }
 
 export async function changeAppliedDate(id: string, onDate: string) {
-  if (!ISO_DATE.test(onDate)) return;
+  if (!isUsableDate(onDate)) return;
 
   await updateAppliedDate(id, onDate);
-  revalidatePath("/");
+  refresh();
 }
