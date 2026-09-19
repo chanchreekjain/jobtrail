@@ -35,8 +35,8 @@ export async function listApplications(): Promise<Application[]> {
 export async function getCounts(): Promise<Counts> {
   const rows = await sql`
     select
-      (select count(*)::int from jobs)                               as jobs,
-      (select count(*)::int from applications)                       as applications,
+      (select count(*)::int from jobs)                                  as jobs,
+      (select count(*)::int from applications)                          as applications,
       (select count(*)::int from applications where status = 'applied') as applied
   `;
   return rows[0] as Counts;
@@ -60,10 +60,22 @@ export async function findApplicationByJobId(jobId: string): Promise<string | nu
   return rows.length > 0 ? (rows[0].id as string) : null;
 }
 
-export async function addToPipeline(jobId: string): Promise<void> {
+/**
+ * Whatever the user typed wins; otherwise fall back to what the model
+ * extracted. coalesce picks the first non-null of the two.
+ */
+export async function addToPipeline(
+  jobId: string,
+  company: string | null,
+  position: string | null,
+): Promise<void> {
   await sql`
     insert into applications (job_id, company, role, status)
-    select id, company, "position", 'draft'
+    select
+      id,
+      coalesce(${company}::text, company),
+      coalesce(${position}::text, "position"),
+      'draft'
     from jobs
     where id = ${jobId}
   `;

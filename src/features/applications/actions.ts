@@ -31,24 +31,41 @@ export async function addApplication(formData: FormData) {
   refresh();
 }
 
-export type PipelineState = { message: string | null };
+export type PipelineState = {
+  message: string | null;
+  ok: boolean;
+};
 
 export async function saveToPipeline(
   _prev: PipelineState,
   formData: FormData,
 ): Promise<PipelineState> {
   const jobId = String(formData.get("job_id") ?? "").trim();
-  if (!jobId) return { message: null };
+  if (!jobId) {
+    return { message: "Nothing to save.", ok: false };
+  }
+
+  // Empty strings mean "the user left it blank", which is not the same as
+  // "use this value" — so they become null and the extracted value stands.
+  const company = String(formData.get("company") ?? "").trim() || null;
+  const position = String(formData.get("position") ?? "").trim() || null;
 
   const existing = await findApplicationByJobId(jobId);
   if (existing) {
-    return { message: "Already in your pipeline." };
+    return { message: "Already in your pipeline.", ok: false };
   }
 
-  await addToPipeline(jobId);
-  refresh();
+  try {
+    await addToPipeline(jobId, company, position);
+  } catch {
+    return {
+      message: "Could not save — please give this job a company name.",
+      ok: false,
+    };
+  }
 
-  return { message: "Saved to pipeline." };
+  refresh();
+  return { message: "Saved to pipeline.", ok: true };
 }
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
