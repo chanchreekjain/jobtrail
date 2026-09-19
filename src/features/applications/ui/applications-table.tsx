@@ -10,6 +10,16 @@ function todayLocal(): string {
   return new Date().toLocaleDateString("en-CA");
 }
 
+function openPicker(input: HTMLInputElement) {
+  // showPicker() throws if the browser doesn't count this as a user gesture,
+  // or if the picker is already open. Neither is worth crashing over.
+  try {
+    input.showPicker?.();
+  } catch {
+    // The native calendar icon still works; nothing to recover from.
+  }
+}
+
 export function ApplicationsTable({ rows }: { rows: Application[] }) {
   const [isPending, startTransition] = useTransition();
   const today = todayLocal();
@@ -71,8 +81,7 @@ export function ApplicationsTable({ rows }: { rows: Application[] }) {
                       max={today}
                       defaultValue={row.applied_at ?? today}
                       disabled={isPending}
-                      onClick={(e) => e.currentTarget.showPicker?.()}
-                      onFocus={(e) => e.currentTarget.showPicker?.()}
+                      onClick={(e) => openPicker(e.currentTarget)}
                       onChange={(e) =>
                         startTransition(() =>
                           changeAppliedDate(row.id, e.target.value),
