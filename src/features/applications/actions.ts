@@ -5,6 +5,9 @@ import {
   insertApplication,
   addToPipeline,
   findApplicationByJobId,
+  markApplied,
+  markNotApplied,
+  updateAppliedDate,
 } from "./repo";
 
 export async function addApplication(formData: FormData) {
@@ -41,4 +44,24 @@ export async function saveToPipeline(
   revalidatePath("/");
 
   return { message: "Saved to pipeline." };
+}
+
+const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
+
+export async function toggleApplied(id: string, applied: boolean, onDate: string) {
+  if (applied) {
+    if (!ISO_DATE.test(onDate)) return;
+    await markApplied(id, onDate);
+  } else {
+    await markNotApplied(id);
+  }
+
+  revalidatePath("/");
+}
+
+export async function changeAppliedDate(id: string, onDate: string) {
+  if (!ISO_DATE.test(onDate)) return;
+
+  await updateAppliedDate(id, onDate);
+  revalidatePath("/");
 }

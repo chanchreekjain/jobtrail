@@ -52,3 +52,29 @@ export async function addToPipeline(jobId: string): Promise<void> {
     where id = ${jobId}
   `;
 }
+
+export async function markApplied(id: string, onDate: string): Promise<void> {
+  await sql`
+    update applications
+    set status = 'applied',
+        applied_at = ${onDate}::date
+    where id = ${id}
+  `;
+}
+
+export async function markNotApplied(id: string): Promise<void> {
+  await sql`
+    update applications
+    set status = 'draft',
+        applied_at = null
+    where id = ${id}
+  `;
+}
+
+export async function updateAppliedDate(id: string, onDate: string): Promise<void> {
+  await sql`
+    update applications
+    set applied_at = ${onDate}::date
+    where id = ${id}
+  `;
+}
