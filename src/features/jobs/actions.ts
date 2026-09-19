@@ -1,10 +1,10 @@
 "use server";
 
-import { extractJob, type ExtractedJob } from "@/lib/ai/provider";
-import { hashJd, findJobByHash, saveJob } from "./repo";
+import { extractJob } from "@/lib/ai/provider";
+import { hashJd, findJobByHash, saveJob, type SavedJob } from "./repo";
 
 export type JdState = {
-  job: ExtractedJob | null;
+  job: SavedJob | null;
   error: string | null;
   cached: boolean;
 };
@@ -24,8 +24,8 @@ export async function analyseJd(_prev: JdState, formData: FormData): Promise<JdS
 
   try {
     const job = await extractJob(rawJd);
-    await saveJob(rawJd, hash, job);
-    return { job, error: null, cached: false };
+    const id = await saveJob(rawJd, hash, job);
+    return { job: { ...job, id }, error: null, cached: false };
   } catch {
     return {
       job: null,

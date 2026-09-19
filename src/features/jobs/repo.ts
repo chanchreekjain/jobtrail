@@ -2,11 +2,13 @@ import { createHash } from "crypto";
 import { sql } from "@/lib/db/client";
 import type { ExtractedJob, Requirement } from "@/lib/ai/provider";
 
+export type SavedJob = ExtractedJob & { id: string };
+
 export function hashJd(rawJd: string): string {
   return createHash("sha256").update(rawJd).digest("hex");
 }
 
-export async function findJobByHash(hash: string): Promise<ExtractedJob | null> {
+export async function findJobByHash(hash: string): Promise<SavedJob | null> {
   const jobs = await sql`
     select
       id,
@@ -28,6 +30,7 @@ export async function findJobByHash(hash: string): Promise<ExtractedJob | null> 
   `;
 
   return {
+    id: job.id as string,
     company: job.company,
     position: job.position,
     deadline: job.deadline,
@@ -39,13 +42,13 @@ export async function saveJob(
   rawJd: string,
   hash: string,
   job: ExtractedJob,
-): Promise<void> {
+): Promise<string> {
   const inserted = await sql`
     insert into jobs (raw_jd, jd_hash, company, "position", deadline)
     values (${rawJd}, ${hash}, ${job.company}, ${job.position}, ${job.deadline})
     returning id
   `;
-  const jobId = inserted[0].id;
+  const jobId = inserted[0].id as string;
 
   for (const r of job.requirements) {
     await sql`
@@ -53,6 +56,8 @@ export async function saveJob(
       values (${jobId}, ${r.text}, ${r.kind}, ${r.skill})
     `;
   }
+
+  return jobId;
 }
 
 export type JobSummary = {

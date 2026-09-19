@@ -1,7 +1,11 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { insertApplication } from "./repo";
+import {
+  insertApplication,
+  addToPipeline,
+  findApplicationByJobId,
+} from "./repo";
 
 export async function addApplication(formData: FormData) {
   const company = String(formData.get("company") ?? "").trim();
@@ -17,4 +21,24 @@ export async function addApplication(formData: FormData) {
   });
 
   revalidatePath("/");
+}
+
+export type PipelineState = { message: string | null };
+
+export async function saveToPipeline(
+  _prev: PipelineState,
+  formData: FormData,
+): Promise<PipelineState> {
+  const jobId = String(formData.get("job_id") ?? "").trim();
+  if (!jobId) return { message: null };
+
+  const existing = await findApplicationByJobId(jobId);
+  if (existing) {
+    return { message: "Already in your pipeline." };
+  }
+
+  await addToPipeline(jobId);
+  revalidatePath("/");
+
+  return { message: "Saved to pipeline." };
 }
