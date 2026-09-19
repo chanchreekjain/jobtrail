@@ -38,3 +38,25 @@ export async function saveJob(
     `;
   }
 }
+
+export type JobSummary = {
+  id: string;
+  preview: string;
+  requirement_count: number;
+  created_at: string;
+};
+
+export async function listJobs(): Promise<JobSummary[]> {
+  const rows = await sql`
+    select
+      j.id,
+      left(j.raw_jd, 120) as preview,
+      count(r.id)::int as requirement_count,
+      j.created_at
+    from jobs j
+    left join requirements r on r.job_id = j.id
+    group by j.id
+    order by j.created_at desc
+  `;
+  return rows as JobSummary[];
+}

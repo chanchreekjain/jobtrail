@@ -6,6 +6,7 @@ export function Nav() {
       <Link href="/" className="font-bold">jobtrail</Link>
       <Link href="/" className="hover:underline">Applications</Link>
       <Link href="/jd" className="hover:underline">Paste a JD</Link>
+      <Link href="/jobs" className="hover:underline">Saved JDs</Link>
     </nav>
   );
 }
