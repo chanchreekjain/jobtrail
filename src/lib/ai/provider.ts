@@ -29,31 +29,54 @@ export type Requirement = {
   skill: string;
 };
 
-export async function extractRequirements(rawJd: string): Promise<Requirement[]> {
+export type ExtractedJob = {
+  company: string | null;
+  position: string | null;
+  deadline: string | null;
+  requirements: Requirement[];
+};
+
+export async function extractJob(rawJd: string): Promise<ExtractedJob> {
   const response = await withRetry(() => ai.models.generateContent({
     model: "gemini-3.6-flash",
-    contents: `Extract every requirement from this job description.
-For each one: the requirement text, whether it is a "must" or a "nice" to have,
-and the single skill it maps to (e.g. "python", "sql", "communication").
+    contents: `Extract structured data from this job description.
+
+company  — the hiring company's name.
+position — the job title as written.
+deadline — the application deadline as YYYY-MM-DD, only if an explicit date is given.
+requirements — every requirement, each with its text, whether it is a "must" or a
+"nice" to have, and the single skill it maps to (e.g. "python", "sql", "communication").
+
+If the job description does not state something, return null for it. Do not guess,
+infer, or fill in a plausible value.
 
 JOB DESCRIPTION:
 ${rawJd}`,
     config: {
       responseMimeType: "application/json",
       responseSchema: {
-        type: Type.ARRAY,
-        items: {
-          type: Type.OBJECT,
-          properties: {
-            text: { type: Type.STRING },
-            kind: { type: Type.STRING, enum: ["must", "nice"] },
-            skill: { type: Type.STRING },
+        type: Type.OBJECT,
+        properties: {
+          company: { type: Type.STRING, nullable: true },
+          position: { type: Type.STRING, nullable: true },
+          deadline: { type: Type.STRING, nullable: true },
+          requirements: {
+            type: Type.ARRAY,
+            items: {
+              type: Type.OBJECT,
+              properties: {
+                text: { type: Type.STRING },
+                kind: { type: Type.STRING, enum: ["must", "nice"] },
+                skill: { type: Type.STRING },
+              },
+              required: ["text", "kind", "skill"],
+            },
           },
-          required: ["text", "kind", "skill"],
         },
+        required: ["company", "position", "deadline", "requirements"],
       },
     },
   }));
 
-  return JSON.parse(response.text ?? "[]") as Requirement[];
+  return JSON.parse(response.text ?? "{}") as ExtractedJob;
 }
