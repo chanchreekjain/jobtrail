@@ -70,7 +70,13 @@ export type JobSummary = {
   created_at: string;
 };
 
-export async function listJobs(): Promise<JobSummary[]> {
+export type JobHistory = {
+  rows: JobSummary[];
+  /** Everything ever analysed, including what the current plan hides. */
+  total: number;
+};
+
+export async function listJobHistory(limit: number): Promise<JobHistory> {
   const rows = await sql`
     select
       j.id,
@@ -84,6 +90,13 @@ export async function listJobs(): Promise<JobSummary[]> {
     left join requirements r on r.job_id = j.id
     group by j.id
     order by j.created_at desc
+    limit ${limit}
   `;
-  return rows as JobSummary[];
+
+  const totals = await sql`select count(*)::int as total from jobs`;
+
+  return {
+    rows: rows as JobSummary[],
+    total: totals[0].total as number,
+  };
 }
