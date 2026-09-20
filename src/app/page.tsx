@@ -3,8 +3,8 @@ import { requireUser } from "@/lib/auth/current-user";
 import { getCounts } from "@/features/applications/repo";
 
 export default async function Home() {
-  await requireUser();
-  const counts = await getCounts();
+  const user = await requireUser();
+  const counts = await getCounts(user.id);
 
   return (
     <main className="min-h-screen p-12 max-w-4xl">

@@ -3,8 +3,8 @@ import { requireUser } from "@/lib/auth/current-user";
 import { ApplicationsTable } from "@/features/applications/ui/applications-table";
 
 export default async function PipelinePage() {
-  await requireUser();
-  const applications = await listApplications();
+  const user = await requireUser();
+  const applications = await listApplications(user.id);
 
   return (
     <main className="min-h-screen p-12 max-w-4xl">

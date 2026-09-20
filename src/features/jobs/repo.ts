@@ -8,7 +8,15 @@ export function hashJd(rawJd: string): string {
   return createHash("sha256").update(rawJd).digest("hex");
 }
 
-export async function findJobByHash(hash: string): Promise<SavedJob | null> {
+/**
+ * The cache lookup is per user now. Two people pasting the same posting
+ * each get their own row — which is why migration 0006 moved the unique
+ * constraint from jd_hash to (user_id, jd_hash).
+ */
+export async function findJobByHash(
+  userId: string,
+  hash: string,
+): Promise<SavedJob | null> {
   const jobs = await sql`
     select
       id,
@@ -16,12 +24,13 @@ export async function findJobByHash(hash: string): Promise<SavedJob | null> {
       "position",
       to_char(deadline, 'YYYY-MM-DD') as deadline
     from jobs
-    where jd_hash = ${hash}
+    where jd_hash = ${hash} and user_id = ${userId}
   `;
   if (jobs.length === 0) return null;
 
   const job = jobs[0];
 
+  // Safe to look up by job_id alone: we just proved this job is theirs.
   const rows = await sql`
     select text, kind, skill
     from requirements
@@ -39,13 +48,17 @@ export async function findJobByHash(hash: string): Promise<SavedJob | null> {
 }
 
 export async function saveJob(
+  userId: string,
   rawJd: string,
   hash: string,
   job: ExtractedJob,
 ): Promise<string> {
   const inserted = await sql`
-    insert into jobs (raw_jd, jd_hash, company, "position", deadline)
-    values (${rawJd}, ${hash}, ${job.company}, ${job.position}, ${job.deadline})
+    insert into jobs (user_id, raw_jd, jd_hash, company, "position", deadline)
+    values (
+      ${userId}, ${rawJd}, ${hash},
+      ${job.company}, ${job.position}, ${job.deadline}
+    )
     returning id
   `;
   const jobId = inserted[0].id as string;
@@ -72,11 +85,14 @@ export type JobSummary = {
 
 export type JobHistory = {
   rows: JobSummary[];
-  /** Everything ever analysed, including what the current plan hides. */
+  /** Everything this user has analysed, including what their plan hides. */
   total: number;
 };
 
-export async function listJobHistory(limit: number): Promise<JobHistory> {
+export async function listJobHistory(
+  userId: string,
+  limit: number,
+): Promise<JobHistory> {
   const rows = await sql`
     select
       j.id,
@@ -88,12 +104,15 @@ export async function listJobHistory(limit: number): Promise<JobHistory> {
       j.created_at
     from jobs j
     left join requirements r on r.job_id = j.id
+    where j.user_id = ${userId}
     group by j.id
     order by j.created_at desc
     limit ${limit}
   `;
 
-  const totals = await sql`select count(*)::int as total from jobs`;
+  const totals = await sql`
+    select count(*)::int as total from jobs where user_id = ${userId}
+  `;
 
   return {
     rows: rows as JobSummary[],

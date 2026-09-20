@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { requireUser } from "@/lib/auth/current-user";
 import {
   insertApplication,
   addToPipeline,
@@ -16,6 +17,8 @@ function refresh() {
 }
 
 export async function addApplication(formData: FormData) {
+  const user = await requireUser();
+
   const company = String(formData.get("company") ?? "").trim();
   const role = String(formData.get("role") ?? "").trim();
   const sourceUrl = String(formData.get("source_url") ?? "").trim();
@@ -23,6 +26,7 @@ export async function addApplication(formData: FormData) {
   if (!company || !role) return;
 
   await insertApplication({
+    userId: user.id,
     company,
     role,
     source_url: sourceUrl || null,
@@ -40,6 +44,8 @@ export async function saveToPipeline(
   _prev: PipelineState,
   formData: FormData,
 ): Promise<PipelineState> {
+  const user = await requireUser();
+
   const jobId = String(formData.get("job_id") ?? "").trim();
   if (!jobId) {
     return { message: "Nothing to save.", ok: false };
@@ -50,13 +56,13 @@ export async function saveToPipeline(
   const company = String(formData.get("company") ?? "").trim() || null;
   const position = String(formData.get("position") ?? "").trim() || null;
 
-  const existing = await findApplicationByJobId(jobId);
+  const existing = await findApplicationByJobId(user.id, jobId);
   if (existing) {
     return { message: "Already in your pipeline.", ok: false };
   }
 
   try {
-    await addToPipeline(jobId, company, position);
+    await addToPipeline(user.id, jobId, company, position);
   } catch {
     return {
       message: "Could not save — please give this job a company name.",
@@ -86,19 +92,22 @@ function isUsableDate(value: string): boolean {
 }
 
 export async function toggleApplied(id: string, applied: boolean, onDate: string) {
+  const user = await requireUser();
+
   if (applied) {
     if (!isUsableDate(onDate)) return;
-    await markApplied(id, onDate);
+    await markApplied(user.id, id, onDate);
   } else {
-    await markNotApplied(id);
+    await markNotApplied(user.id, id);
   }
 
   refresh();
 }
 
 export async function changeAppliedDate(id: string, onDate: string) {
+  const user = await requireUser();
   if (!isUsableDate(onDate)) return;
 
-  await updateAppliedDate(id, onDate);
+  await updateAppliedDate(user.id, id, onDate);
   refresh();
 }
