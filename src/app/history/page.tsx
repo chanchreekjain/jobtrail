@@ -1,7 +1,9 @@
 import { listJobHistory } from "@/features/jobs/repo";
 import { currentPlan } from "@/lib/plans";
+import { requireUser } from "@/lib/auth/current-user";
 
 export default async function HistoryPage() {
+  await requireUser();
   const plan = currentPlan();
   const { rows, total } = await listJobHistory(plan.historyLimit);
   const hidden = total - rows.length;

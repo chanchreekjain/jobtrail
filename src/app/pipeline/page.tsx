@@ -1,7 +1,9 @@
 import { listApplications } from "@/features/applications/repo";
+import { requireUser } from "@/lib/auth/current-user";
 import { ApplicationsTable } from "@/features/applications/ui/applications-table";
 
 export default async function PipelinePage() {
+  await requireUser();
   const applications = await listApplications();
 
   return (

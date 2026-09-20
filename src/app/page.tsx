@@ -1,7 +1,9 @@
 import Link from "next/link";
+import { requireUser } from "@/lib/auth/current-user";
 import { getCounts } from "@/features/applications/repo";
 
 export default async function Home() {
+  await requireUser();
   const counts = await getCounts();
 
   return (
