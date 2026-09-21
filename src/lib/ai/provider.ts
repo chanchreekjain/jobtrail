@@ -128,6 +128,8 @@ export type NumberedSource = {
  * confident it sounds.
  */
 export type CompanySummary = {
+  /** The company's name as the sources write it — fixes the user's typos. */
+  companyName: string;
   summary: string;
   facts: { claim: string; source: number }[];
   careersSource: number | null;
@@ -146,6 +148,9 @@ export async function summariseCompany(
     contents: `You are researching the company "${companyName}" for a job applicant.
 Use ONLY the numbered sources below. Do not use anything you already know.
 
+companyName — the company's name spelled exactly as the sources write it
+  (the user may have misspelled it). If the sources don't name it, repeat
+  the name you were given.
 summary — two or three plain sentences: what the company does and anything
   an applicant should know. Only what the sources support.
 facts — short, specific statements (recent news, size, funding, products),
@@ -167,6 +172,7 @@ ${numbered}`,
       responseSchema: {
         type: Type.OBJECT,
         properties: {
+          companyName: { type: Type.STRING },
           summary: { type: Type.STRING },
           facts: {
             type: Type.ARRAY,
@@ -182,7 +188,7 @@ ${numbered}`,
           careersSource: { type: Type.INTEGER, nullable: true },
           recruitingContact: { type: Type.STRING, nullable: true },
         },
-        required: ["summary", "facts", "careersSource", "recruitingContact"],
+        required: ["companyName", "summary", "facts", "careersSource", "recruitingContact"],
       },
     },
   });

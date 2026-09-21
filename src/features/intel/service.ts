@@ -73,9 +73,15 @@ export async function researchCompany(
   }
 
   let data: IntelData;
+  let canonical = name;
   try {
     const raw = await summariseCompany(name, sources);
     data = validate(raw, sources);
+    // Trust the model's spelling only when it found real, sourced facts —
+    // otherwise it may be naming some other company the search turned up.
+    if (data.facts.length > 0 && raw.companyName?.trim()) {
+      canonical = raw.companyName.trim();
+    }
   } catch (error) {
     // Message only: the full error object can include request details.
     console.error("[intel] summarise failed:", (error as Error).message);
@@ -88,12 +94,15 @@ export async function researchCompany(
     };
   }
 
-  await saveIntel(key, name, data);
+  // Cache under the real name, not the typo: the next person to type it
+  // correctly gets an exact hit, and anyone who typos it gets a suggestion
+  // spelled properly.
+  await saveIntel(companyKey(canonical), canonical, data);
   await recordLookup(userId, key);
 
   return {
     status: "ok",
-    intel: { companyName: name, data, fetchedAt: new Date().toISOString() },
+    intel: { companyName: canonical, data, fetchedAt: new Date().toISOString() },
     cached: false,
     remaining: limit - used - 1,
   };
