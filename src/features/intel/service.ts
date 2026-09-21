@@ -19,9 +19,13 @@ export type ResearchResult =
  * The order of the checks is the whole design:
  *   1. cache    — free, so it comes first and never touches the allowance
  *   2. allowance — refuse before spending anything
- *   3. search   — the only step that costs a credit, so it's logged
- *                 the moment it succeeds, whatever happens after
+ *   3. search   — the only step that costs a Tavily credit
  *   4. model + validation, then cache it for everyone
+ *   5. only now count it against the user's weekly allowance
+ *
+ * Step 5 is last on purpose: if Gemini is overloaded, that's our failure,
+ * not the user's, so they shouldn't lose one of their lookups to it. The
+ * cost is that a failed attempt still burns one Tavily credit.
  */
 export async function researchCompany(
   userId: string,
@@ -52,9 +56,6 @@ export async function researchCompany(
     return { status: "error", message: "Search is unavailable right now. Try again later." };
   }
 
-  // The credit is spent now, even if the model fails below.
-  await recordLookup(userId, key);
-
   if (sources.length === 0) {
     return { status: "error", message: `Couldn't find anything about "${name}".` };
   }
@@ -66,10 +67,17 @@ export async function researchCompany(
   } catch (error) {
     // Message only: the full error object can include request details.
     console.error("[intel] summarise failed:", (error as Error).message);
-    return { status: "error", message: "Couldn't summarise the results. Try again." };
+    const busy = (error as { status?: number }).status === 503;
+    return {
+      status: "error",
+      message: busy
+        ? "The AI is overloaded right now. Try again in a minute — this didn't use a lookup."
+        : "Couldn't summarise the results. Try again — this didn't use a lookup.",
+    };
   }
 
   await saveIntel(key, name, data);
+  await recordLookup(userId, key);
 
   return {
     status: "ok",
