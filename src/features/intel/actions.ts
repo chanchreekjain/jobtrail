@@ -22,6 +22,7 @@ export async function researchAction(
     };
   }
 
-  const result = await researchCompany(user.id, company);
+  const skipSuggestion = formData.get("force") === "1";
+  const result = await researchCompany(user.id, company, skipSuggestion);
   return { company, result };
 }

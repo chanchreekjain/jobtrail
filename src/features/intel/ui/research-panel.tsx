@@ -37,6 +37,9 @@ export function ResearchPanel({ initialCompany }: { initialCompany: string }) {
     <div>
       <form action={formAction} className="flex gap-2 mb-8">
         <input
+          // Remount when the company changes, so picking a suggestion
+          // updates the box — defaultValue alone is only read once.
+          key={state.company}
           name="company"
           defaultValue={state.company}
           placeholder="Company name"
@@ -60,6 +63,38 @@ export function ResearchPanel({ initialCompany }: { initialCompany: string }) {
 
       {result?.status === "error" && (
         <p className="text-red-600">{result.message}</p>
+      )}
+
+      {result?.status === "suggest" && (
+        <div className="mb-6 space-y-3">
+          <p>
+            Did you mean <strong>{result.suggestion}</strong>? It&apos;s already
+            been researched, so it&apos;s free.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <form action={formAction}>
+              <input type="hidden" name="company" value={result.suggestion} />
+              <button
+                type="submit"
+                disabled={isPending}
+                className="bg-blue-600 text-white rounded px-4 py-2 disabled:opacity-50"
+              >
+                Yes, show {result.suggestion}
+              </button>
+            </form>
+            <form action={formAction}>
+              <input type="hidden" name="company" value={result.typed} />
+              <input type="hidden" name="force" value="1" />
+              <button
+                type="submit"
+                disabled={isPending}
+                className="border border-gray-400 rounded px-4 py-2 disabled:opacity-50"
+              >
+                No, research &ldquo;{result.typed}&rdquo; (uses a lookup)
+              </button>
+            </form>
+          </div>
+        </div>
       )}
 
       {result?.status === "limit" && (

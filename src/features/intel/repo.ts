@@ -5,11 +5,42 @@ import type { CompanyIntel, IntelData } from "./types";
 const MAX_AGE_DAYS = 30;
 
 /**
- * "Swiggy", " swiggy " and "SWIGGY" should share one cache row.
- * Collapses inner whitespace too, so "Tata  Motors" matches "Tata Motors".
+ * "Swiggy", " swiggy ", "SWIGGY" and "Swiggy!" should share one cache row.
+ * Keeps letters (in any script), digits and single spaces; drops the rest.
  */
 export function companyKey(name: string): string {
-  return name.trim().toLowerCase().replace(/\s+/g, " ");
+  return name
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}\s]/gu, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/**
+ * Below this, two names are treated as different companies. 0.4 is a
+ * judgement call: loose enough to catch "nicrosoft", strict enough not to
+ * offer "Meta" for "Metro". Tune it by looking at real misses.
+ */
+const SIMILARITY_THRESHOLD = 0.4;
+
+/**
+ * The closest fresh cached company to a name that missed the exact
+ * cache — to *suggest*, never to use silently. A wrong guess about which
+ * company someone meant is worse than asking.
+ */
+export async function findSimilarIntel(
+  key: string,
+): Promise<{ companyName: string } | null> {
+  const rows = await sql`
+    select company_name
+    from company_intel
+    where company_key <> ${key}
+      and similarity(company_key, ${key}) > ${SIMILARITY_THRESHOLD}
+      and fetched_at > now() - make_interval(days => ${MAX_AGE_DAYS})
+    order by similarity(company_key, ${key}) desc
+    limit 1
+  `;
+  return rows.length > 0 ? { companyName: rows[0].company_name as string } : null;
 }
 
 export async function findFreshIntel(key: string): Promise<CompanyIntel | null> {

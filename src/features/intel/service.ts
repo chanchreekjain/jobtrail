@@ -4,6 +4,7 @@ import { currentPlan } from "@/lib/plans";
 import {
   companyKey,
   findFreshIntel,
+  findSimilarIntel,
   saveIntel,
   countLookupsThisWeek,
   recordLookup,
@@ -13,6 +14,7 @@ import type { CompanyIntel, IntelData, IntelFact } from "./types";
 export type ResearchResult =
   | { status: "ok"; intel: CompanyIntel; cached: boolean; remaining: number }
   | { status: "limit"; remaining: 0 }
+  | { status: "suggest"; typed: string; suggestion: string }
   | { status: "error"; message: string };
 
 /**
@@ -30,6 +32,8 @@ export type ResearchResult =
 export async function researchCompany(
   userId: string,
   rawName: string,
+  /** True once the user has said "no, I meant what I typed". */
+  skipSuggestion = false,
 ): Promise<ResearchResult> {
   const name = rawName.trim();
   if (!name) return { status: "error", message: "No company name to research." };
@@ -41,6 +45,14 @@ export async function researchCompany(
   const cached = await findFreshIntel(key);
   if (cached) {
     return { status: "ok", intel: cached, cached: true, remaining: limit - used };
+  }
+
+  // A near miss on the cache: ask before spending anything.
+  if (!skipSuggestion) {
+    const similar = await findSimilarIntel(key);
+    if (similar) {
+      return { status: "suggest", typed: name, suggestion: similar.companyName };
+    }
   }
 
   if (used >= limit) return { status: "limit", remaining: 0 };
