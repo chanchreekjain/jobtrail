@@ -1,0 +1,150 @@
+"use client";
+
+import { useActionState } from "react";
+import { researchAction, type ResearchState } from "../actions";
+import { Working } from "@/components/working";
+
+/** Show "techcrunch.com" rather than a 200-character URL. */
+function hostOf(url: string): string {
+  try {
+    return new URL(url).hostname.replace(/^www\./, "");
+  } catch {
+    return url;
+  }
+}
+
+/**
+ * A plain LinkedIn people search for the company. We build the link; the
+ * user's own LinkedIn session runs the search and shows their own network.
+ * Nothing is fetched or stored by us, so it costs no credits and still
+ * works when the weekly allowance is used up.
+ */
+function linkedInPeopleUrl(company: string): string {
+  return `https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(company)}`;
+}
+
+const external = { target: "_blank", rel: "noopener noreferrer" } as const;
+
+export function ResearchPanel({ initialCompany }: { initialCompany: string }) {
+  const [state, formAction, isPending] = useActionState<ResearchState, FormData>(
+    researchAction,
+    { company: initialCompany, result: null },
+  );
+
+  const result = state.result;
+
+  return (
+    <div>
+      <form action={formAction} className="flex gap-2 mb-8">
+        <input
+          name="company"
+          defaultValue={state.company}
+          placeholder="Company name"
+          required
+          className="flex-1 border border-gray-400 rounded px-3 py-2 bg-transparent"
+        />
+        <button
+          type="submit"
+          disabled={isPending}
+          className="bg-blue-600 text-white rounded px-4 py-2 disabled:opacity-50"
+        >
+          {isPending ? "Researching…" : "Research"}
+        </button>
+      </form>
+
+      {isPending && (
+        <div className="mb-6">
+          <Working label="Searching the web and checking sources" />
+        </div>
+      )}
+
+      {result?.status === "error" && (
+        <p className="text-red-600">{result.message}</p>
+      )}
+
+      {result?.status === "limit" && (
+        <p className="text-gray-500 mb-6">
+          You&apos;ve used this week&apos;s research lookups. Companies someone
+          has already researched still load for free, and the links below
+          always work.
+        </p>
+      )}
+
+      {result?.status === "ok" && (
+        <section className="space-y-6">
+          <div>
+            <h2 className="text-xl font-semibold mb-2">
+              {result.intel.companyName}
+            </h2>
+            <p>{result.intel.data.summary}</p>
+          </div>
+
+          {result.intel.data.facts.length > 0 && (
+            <ul className="space-y-2">
+              {result.intel.data.facts.map((fact, i) => (
+                <li key={i} className="text-sm">
+                  {fact.claim}{" "}
+                  <a
+                    href={fact.sourceUrl}
+                    {...external}
+                    className="text-blue-600 hover:underline"
+                  >
+                    ({hostOf(fact.sourceUrl)})
+                  </a>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          <div className="text-sm space-y-1">
+            {result.intel.data.careersUrl && (
+              <p>
+                Careers page:{" "}
+                <a
+                  href={result.intel.data.careersUrl}
+                  {...external}
+                  className="text-blue-600 hover:underline"
+                >
+                  {hostOf(result.intel.data.careersUrl)}
+                </a>
+              </p>
+            )}
+            {result.intel.data.recruitingContact && (
+              <p>
+                Recruiting contact:{" "}
+                <a
+                  href={`mailto:${result.intel.data.recruitingContact}`}
+                  className="text-blue-600 hover:underline"
+                >
+                  {result.intel.data.recruitingContact}
+                </a>
+              </p>
+            )}
+          </div>
+
+          <p className="text-xs text-gray-500">
+            {result.cached
+              ? `Already researched on ${new Date(result.intel.fetchedAt).toLocaleDateString()} — didn't use a lookup.`
+              : "Freshly researched."}{" "}
+            {Math.max(result.remaining, 0)} lookups left this week.
+          </p>
+        </section>
+      )}
+
+      {result && state.company && (
+        <p className="mt-6 text-sm">
+          <a
+            href={linkedInPeopleUrl(state.company)}
+            {...external}
+            className="text-blue-600 hover:underline"
+          >
+            People at {state.company} on LinkedIn →
+          </a>{" "}
+          <span className="text-gray-500">
+            Filter by your connections or your college to find a referral.
+          </span>
+        </p>
+      )}
+    </div>
+  );
+}

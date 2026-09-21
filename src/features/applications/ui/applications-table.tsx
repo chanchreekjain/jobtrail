@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useTransition } from "react";
 import { toggleApplied, changeAppliedDate } from "../actions";
 import type { Application } from "../repo";
@@ -49,7 +50,19 @@ export function ApplicationsTable({ rows }: { rows: Application[] }) {
 
             return (
               <tr key={row.id} className="border-b border-gray-200">
-                <td className="py-3 pr-4">{row.company ?? "—"}</td>
+                <td className="py-3 pr-4">
+                  {row.company ? (
+                    <Link
+                      href={`/research?company=${encodeURIComponent(row.company)}`}
+                      className="hover:underline"
+                      title="Research this company"
+                    >
+                      {row.company}
+                    </Link>
+                  ) : (
+                    "—"
+                  )}
+                </td>
                 <td className="py-3 pr-4">{row.role ?? "—"}</td>
                 <td className="py-3 pr-4">
                   <button

@@ -47,7 +47,8 @@ export async function researchCompany(
       maxResults: 8,
     });
     sources = results.map((r, i) => ({ n: i + 1, ...r }));
-  } catch {
+  } catch (error) {
+    console.error("[intel] search failed:", (error as Error).message);
     return { status: "error", message: "Search is unavailable right now. Try again later." };
   }
 
@@ -62,7 +63,9 @@ export async function researchCompany(
   try {
     const raw = await summariseCompany(name, sources);
     data = validate(raw, sources);
-  } catch {
+  } catch (error) {
+    // Message only: the full error object can include request details.
+    console.error("[intel] summarise failed:", (error as Error).message);
     return { status: "error", message: "Couldn't summarise the results. Try again." };
   }
 

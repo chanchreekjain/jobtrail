@@ -7,6 +7,7 @@ import {
   type PipelineState,
 } from "@/features/applications/actions";
 import { JobTable } from "./job-table";
+import { Working } from "@/components/working";
 
 const initialState: JdState = { job: null, error: null, cached: false };
 const initialPipelineState: PipelineState = { message: null, ok: false };
@@ -36,6 +37,8 @@ export function JdForm() {
           {isPending ? "Extracting…" : "Extract"}
         </button>
       </form>
+
+      {isPending && <Working label="Reading the JD and pulling out requirements" />}
 
       {state.error && <p className="text-red-500">{state.error}</p>}
 
