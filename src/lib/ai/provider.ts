@@ -80,3 +80,81 @@ ${rawJd}`,
 
   return JSON.parse(response.text ?? "{}") as ExtractedJob;
 }
+
+/** A search result handed to the model, numbered so it can cite it. */
+export type NumberedSource = {
+  n: number;
+  title: string;
+  url: string;
+  content: string;
+};
+
+/**
+ * What the model returns. Note what's missing: URLs. The model cites a
+ * source by its number and the caller looks the URL up — so a link it
+ * didn't actually receive cannot appear in the output, however
+ * confident it sounds.
+ */
+export type CompanySummary = {
+  summary: string;
+  facts: { claim: string; source: number }[];
+  careersSource: number | null;
+  recruitingContact: string | null;
+};
+
+export async function summariseCompany(
+  companyName: string,
+  sources: NumberedSource[],
+): Promise<CompanySummary> {
+  const numbered = sources
+    .map((s) => `[${s.n}] ${s.title}\n${s.url}\n${s.content}`)
+    .join("\n\n");
+
+  const response = await withRetry(() => ai.models.generateContent({
+    model: "gemini-3.6-flash",
+    contents: `You are researching the company "${companyName}" for a job applicant.
+Use ONLY the numbered sources below. Do not use anything you already know.
+
+summary — two or three plain sentences: what the company does and anything
+  an applicant should know. Only what the sources support.
+facts — short, specific statements (recent news, size, funding, products),
+  each with the number of the source that states it. Skip anything no
+  source states. Five at most.
+careersSource — the number of a source that is the company's own careers
+  or jobs page, or null if none is.
+recruitingContact — an email address the company itself publishes for
+  job applicants (e.g. careers@, jobs@), copied exactly from a source, or
+  null. Never an individual employee's personal address. Never guessed.
+
+If the sources are about a different company with a similar name, return
+an empty facts list and say so in the summary.
+
+SOURCES:
+${numbered}`,
+    config: {
+      responseMimeType: "application/json",
+      responseSchema: {
+        type: Type.OBJECT,
+        properties: {
+          summary: { type: Type.STRING },
+          facts: {
+            type: Type.ARRAY,
+            items: {
+              type: Type.OBJECT,
+              properties: {
+                claim: { type: Type.STRING },
+                source: { type: Type.INTEGER },
+              },
+              required: ["claim", "source"],
+            },
+          },
+          careersSource: { type: Type.INTEGER, nullable: true },
+          recruitingContact: { type: Type.STRING, nullable: true },
+        },
+        required: ["summary", "facts", "careersSource", "recruitingContact"],
+      },
+    },
+  }));
+
+  return JSON.parse(response.text ?? "{}") as CompanySummary;
+}
