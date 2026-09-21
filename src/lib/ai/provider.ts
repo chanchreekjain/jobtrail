@@ -23,6 +23,39 @@ if (!process.env.GEMINI_API_KEY) {
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
+/**
+ * Models to try, in order. When the first is overloaded (503) or
+ * rate-limited (429), fall through to the next — a different model is
+ * usually served from different capacity, so it's often fine when the
+ * first isn't. Lite is smaller and a little less capable, but a slightly
+ * plainer answer beats an error.
+ */
+const MODELS = ["gemini-3.6-flash", "gemini-3.5-flash-lite"];
+
+type Request = Omit<Parameters<typeof ai.models.generateContent>[0], "model">;
+
+async function generate(request: Request) {
+  let lastError: unknown;
+
+  for (const model of MODELS) {
+    try {
+      // Two tries per model rather than three: with a fallback waiting,
+      // there's no point making the user sit through a long backoff.
+      return await withRetry(
+        () => ai.models.generateContent({ ...request, model }),
+        2,
+      );
+    } catch (error) {
+      lastError = error;
+      const status = (error as { status?: number }).status;
+      if (status !== 503 && status !== 429) throw error;
+      console.warn(`[ai] ${model} unavailable (${status}), trying next model`);
+    }
+  }
+
+  throw lastError;
+}
+
 export type Requirement = {
   text: string;
   kind: "must" | "nice";
@@ -37,8 +70,7 @@ export type ExtractedJob = {
 };
 
 export async function extractJob(rawJd: string): Promise<ExtractedJob> {
-  const response = await withRetry(() => ai.models.generateContent({
-    model: "gemini-3.6-flash",
+  const response = await generate({
     contents: `Extract structured data from this job description.
 
 company  — the hiring company's name.
@@ -76,7 +108,7 @@ ${rawJd}`,
         required: ["company", "position", "deadline", "requirements"],
       },
     },
-  }));
+  });
 
   return JSON.parse(response.text ?? "{}") as ExtractedJob;
 }
@@ -110,8 +142,7 @@ export async function summariseCompany(
     .map((s) => `[${s.n}] ${s.title}\n${s.url}\n${s.content}`)
     .join("\n\n");
 
-  const response = await withRetry(() => ai.models.generateContent({
-    model: "gemini-3.6-flash",
+  const response = await generate({
     contents: `You are researching the company "${companyName}" for a job applicant.
 Use ONLY the numbered sources below. Do not use anything you already know.
 
@@ -154,7 +185,7 @@ ${numbered}`,
         required: ["summary", "facts", "careersSource", "recruitingContact"],
       },
     },
-  }));
+  });
 
   return JSON.parse(response.text ?? "{}") as CompanySummary;
 }
