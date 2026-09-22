@@ -4,6 +4,7 @@ import { toCsv } from "@/lib/csv";
 import {
   workModeLabel,
   employmentLabel,
+  salaryPeriodLabel,
 } from "@/features/jobs/details";
 
 /** "2026-09-22" from a timestamp, whether the driver hands us a Date or a string. */
@@ -30,7 +31,7 @@ export async function GET() {
     [
       "Company", "Role", "Status", "Applied on", "Location", "Work mode",
       "Employment type", "Min experience (yrs)", "Salary",
-      "Salary min", "Salary max", "Currency", "Per",
+      "Salary min", "Salary max", "Currency", "Pay period",
       "Contact email", "Notes", "Added on",
     ],
     applications.map((a) => [
@@ -46,7 +47,7 @@ export async function GET() {
       a.salaryMin,
       a.salaryMax,
       a.salaryCurrency,
-      a.salaryPeriod,
+      salaryPeriodLabel(a),
       a.contactEmail,
       a.notes,
       day(a.created_at),

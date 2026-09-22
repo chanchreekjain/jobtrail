@@ -31,6 +31,12 @@ const EMPLOYMENT_LABEL = {
   internship: "Internship",
 };
 
+const PERIOD_LABEL = { year: "Yearly", month: "Monthly", hour: "Hourly" };
+
+export function salaryPeriodLabel(d: Partial<JobDetails>): string | null {
+  return d.salaryPeriod ? PERIOD_LABEL[d.salaryPeriod] : null;
+}
+
 export function workModeLabel(d: Partial<JobDetails>): string | null {
   return d.workMode ? WORK_MODE_LABEL[d.workMode] : null;
 }
