@@ -12,11 +12,29 @@
   --font-mono: var(--font-geist-mono);
 }
 
+/*
+ * Theme: the layout sets data-theme="light" or "dark" on <html> when the
+ * user picked one in Settings. With no attribute ("Match my device"), the
+ * media query follows the operating system.
+ * color-scheme makes the browser's own controls (date pickers, scrollbars)
+ * match too.
+ */
+:root {
+  color-scheme: light;
+}
+
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     --background: #0a0a0a;
     --foreground: #ededed;
+    color-scheme: dark;
   }
+}
+
+:root[data-theme="dark"] {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+  color-scheme: dark;
 }
 
 body {
