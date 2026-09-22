@@ -8,7 +8,19 @@ export default async function PipelinePage() {
 
   return (
     <main className="min-h-screen p-12 max-w-4xl">
-      <h1 className="text-2xl font-bold mb-6">Pipeline</h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold">Pipeline</h1>
+        {/* A plain <a>, not <Link>: Link does in-app navigation, and this
+            URL returns a file, not a page. */}
+        {applications.length > 0 && (
+          <a
+            href="/pipeline/export"
+            className="border border-gray-400 rounded px-3 py-1.5 text-sm hover:bg-gray-100 hover:text-black"
+          >
+            Download CSV
+          </a>
+        )}
+      </div>
       <ApplicationsTable rows={applications} />
     </main>
   );
