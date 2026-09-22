@@ -403,3 +403,63 @@ isn't in the resume, return null or an empty list. Do not guess.`,
     education: Array.isArray(raw.education) ? (raw.education as ResumeEducation[]) : [],
   };
 }
+
+export type RequirementToMatch = { n: number; text: string; skill: string };
+
+export type RawMatch = { n: number; met: boolean; evidence: string | null };
+
+/**
+ * Judges each JD requirement against the resume. The model is only allowed
+ * to say "met" by quoting evidence from the resume; the caller checks that
+ * the quote is really there. Synonyms are the reason a model is used at
+ * all — "postgres" meeting "postgresql", "react" meeting "frontend".
+ */
+export async function matchRequirements(
+  requirements: RequirementToMatch[],
+  resume: { skills: string[]; experience: ResumeRole[] },
+): Promise<RawMatch[]> {
+  const reqList = requirements.map((r) => `[${r.n}] ${r.text} (skill: ${r.skill})`).join("\n");
+  const roles = resume.experience
+    .map((r) => `- ${r.title}${r.company ? ` at ${r.company}` : ""}: ${r.highlights.join("; ")}`)
+    .join("\n");
+
+  const response = await generate({
+    contents: `Decide, for each numbered job requirement, whether this candidate's
+resume shows it.
+
+met — true only if the resume clearly shows the skill or an obvious
+  equivalent (e.g. "postgresql" for "postgres", "javascript" for "js").
+  Related-but-different skills do not count. When unsure, false.
+evidence — when met, the exact resume skill or a short phrase copied
+  word for word from the experience below. Null when not met.
+
+Answer every requirement number exactly once.
+
+REQUIREMENTS:
+${reqList}
+
+RESUME SKILLS:
+${resume.skills.join(", ")}
+
+RESUME EXPERIENCE:
+${roles || "(none listed)"}`,
+    config: {
+      responseMimeType: "application/json",
+      responseSchema: {
+        type: Type.ARRAY,
+        items: {
+          type: Type.OBJECT,
+          properties: {
+            n: { type: Type.INTEGER },
+            met: { type: Type.BOOLEAN },
+            evidence: { type: Type.STRING, nullable: true },
+          },
+          required: ["n", "met", "evidence"],
+        },
+      },
+    },
+  });
+
+  const raw = JSON.parse(response.text ?? "[]");
+  return Array.isArray(raw) ? (raw as RawMatch[]) : [];
+}

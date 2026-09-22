@@ -10,6 +10,12 @@ export type Application = {
   source_url: string | null;
   applied_at: string | null;
   created_at: string;
+  job_id: string | null;
+  /** Match against the current resume; null if not scored yet. */
+  match_score: number | null;
+  match_scored: boolean;
+  must_met: number | null;
+  must_total: number | null;
 } & JobDetails;
 
 export type Counts = {
@@ -41,9 +47,23 @@ export async function listApplications(userId: string): Promise<Application[]> {
       a.source_url,
       to_char(a.applied_at, 'YYYY-MM-DD') as applied_at,
       a.created_at,
+      a.job_id,
+      m.id is not null as match_scored,
+      m.score as match_score,
+      m.must_met,
+      m.must_total,
       ${JOB_DETAIL_COLUMNS}
     from applications a
     left join jobs j on j.id = a.job_id
+    -- Only the match against the user's newest resume counts.
+    left join matches m
+      on m.job_id = a.job_id
+     and m.resume_id = (
+       select id from resumes
+       where user_id = ${userId}
+       order by created_at desc
+       limit 1
+     )
     where a.user_id = ${userId}
     order by a.created_at desc
   `;
@@ -55,6 +75,11 @@ export async function listApplications(userId: string): Promise<Application[]> {
     source_url: r.source_url as string | null,
     applied_at: r.applied_at as string | null,
     created_at: r.created_at as string,
+    job_id: r.job_id as string | null,
+    match_scored: Boolean(r.match_scored),
+    match_score: r.match_score as number | null,
+    must_met: r.must_met as number | null,
+    must_total: r.must_total as number | null,
     ...toJobDetails(r),
   }));
 }

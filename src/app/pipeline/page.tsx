@@ -1,3 +1,4 @@
+import { findCurrentResume } from "@/features/resume/repo";
 import Link from "next/link";
 import { listApplications } from "@/features/applications/repo";
 import { requireUser } from "@/lib/auth/current-user";
@@ -6,6 +7,7 @@ import { ApplicationsTable } from "@/features/applications/ui/applications-table
 export default async function PipelinePage() {
   const user = await requireUser();
   const applications = await listApplications(user.id);
+  const hasResume = (await findCurrentResume(user.id)) !== null;
 
   return (
     <main className="min-h-screen p-12 max-w-4xl">
@@ -31,7 +33,7 @@ export default async function PipelinePage() {
           )}
         </div>
       </div>
-      <ApplicationsTable rows={applications} />
+      <ApplicationsTable rows={applications} hasResume={hasResume} />
     </main>
   );
 }

@@ -5,6 +5,7 @@ import { useTransition } from "react";
 import { toggleApplied, changeAppliedDate } from "../actions";
 import type { Application } from "../repo";
 import { detailsSummary } from "@/features/jobs/details";
+import { MatchCell } from "@/features/match/ui/match-cell";
 
 function todayLocal(): string {
   // en-CA formats as YYYY-MM-DD, and this uses the browser's timezone —
@@ -22,7 +23,13 @@ function openPicker(input: HTMLInputElement) {
   }
 }
 
-export function ApplicationsTable({ rows }: { rows: Application[] }) {
+export function ApplicationsTable({
+  rows,
+  hasResume,
+}: {
+  rows: Application[];
+  hasResume: boolean;
+}) {
   const [isPending, startTransition] = useTransition();
   const today = todayLocal();
 
@@ -41,6 +48,7 @@ export function ApplicationsTable({ rows }: { rows: Application[] }) {
           <tr className="border-b border-gray-300 text-left">
             <th className="py-2 pr-4 font-medium">Company</th>
             <th className="py-2 pr-4 font-medium">Role</th>
+            <th className="py-2 pr-4 font-medium">Match</th>
             <th className="py-2 pr-4 font-medium">Details</th>
             <th className="py-2 pr-4 font-medium">Contact</th>
             <th className="py-2 pr-4 font-medium">Applied</th>
@@ -58,6 +66,9 @@ export function ApplicationsTable({ rows }: { rows: Application[] }) {
               <tr key={row.id} className="border-b border-gray-200">
                 <td className="py-3 pr-4">{row.company ?? "—"}</td>
                 <td className="py-3 pr-4">{row.role ?? "—"}</td>
+                <td className="py-3 pr-4 whitespace-nowrap">
+                  <MatchCell row={row} hasResume={hasResume} />
+                </td>
                 <td className="py-3 pr-4 min-w-48">
                   {detailsSummary(row) ?? <span className="text-gray-400">—</span>}
                   {row.notes && (
