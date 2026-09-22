@@ -22,7 +22,7 @@ arbitrary, it's one of these.
 3. **Layers, strictly ordered.** `route/page → action → service → repository → db`.
    No layer skips the next one. A page never writes SQL; a repository never calls an LLM.
 4. **All I/O behind an adapter.** Database, LLM provider, email. One file each. Swapping
-   Anthropic for OpenAI, or Neon for Supabase, should touch one file.
+   Gemini for OpenAI, or Neon for Supabase, should touch one file.
 5. **Secrets never reach the browser.** Every AI and database call happens on the server.
    This is not a preference, it's the whole reason the app has a backend.
 6. **Reversible over correct.** You don't know the final schema. Put every query behind a
@@ -56,7 +56,7 @@ flowchart TB
 
     subgraph External
         DB[(Postgres<br/>Neon)]
-        LLM[LLM provider<br/>Anthropic / OpenAI]
+        LLM[LLM provider<br/>Gemini]
         MAIL[Email<br/>Resend]
     end
 
@@ -187,7 +187,7 @@ jobtrail/
 │   │   │   └── migrate.ts        # runs db/migrations in order
 │   │   ├── ai/
 │   │   │   ├── provider.ts       # the interface everything else imports
-│   │   │   ├── anthropic.ts      # one implementation
+│   │   │   ├── gemini.ts         # one implementation
 │   │   │   ├── schemas.ts        # zod schemas for structured output
 │   │   │   └── prompts/
 │   │   │       ├── extract-requirements.ts
@@ -311,7 +311,7 @@ applications accumulate.
 The interfaces that make swapping implementations cheap.
 
 ```ts
-// lib/ai/provider.ts — everything imports this, nothing imports anthropic.ts directly
+// lib/ai/provider.ts — everything imports this, nothing imports gemini.ts directly
 export interface AIProvider {
   extractRequirements(rawJd: string): Promise<Requirement[]>;
   tailorBullets(input: TailorInput): Promise<TailoredBullet[]>;
@@ -367,7 +367,7 @@ and anything you might later call from outside the app.
 
 ```
 DATABASE_URL=            # Neon connection string
-ANTHROPIC_API_KEY=       # server only, never NEXT_PUBLIC_
+GEMINI_API_KEY=          # server only, never NEXT_PUBLIC_
 AUTH_SECRET=
 AUTH_GITHUB_ID=
 AUTH_GITHUB_SECRET=
