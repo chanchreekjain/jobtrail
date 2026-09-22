@@ -62,12 +62,45 @@ export type Requirement = {
   skill: string;
 };
 
+export type WorkMode = "remote" | "hybrid" | "onsite";
+export type EmploymentType = "full_time" | "part_time" | "contract" | "internship";
+export type SalaryPeriod = "year" | "month" | "hour";
+
 export type ExtractedJob = {
   company: string | null;
   position: string | null;
   deadline: string | null;
+  location: string | null;
+  workMode: WorkMode | null;
+  employmentType: EmploymentType | null;
+  experienceMin: number | null;
+  salaryRaw: string | null;
+  salaryMin: number | null;
+  salaryMax: number | null;
+  salaryCurrency: string | null;
+  salaryPeriod: SalaryPeriod | null;
+  contactEmail: string | null;
+  notes: string | null;
   requirements: Requirement[];
 };
+
+const WORK_MODES: WorkMode[] = ["remote", "hybrid", "onsite"];
+const EMPLOYMENT_TYPES: EmploymentType[] = ["full_time", "part_time", "contract", "internship"];
+const SALARY_PERIODS: SalaryPeriod[] = ["year", "month", "hour"];
+const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+/** A value from a fixed list, or null — never something the database will refuse. */
+function oneOf<T extends string>(value: unknown, allowed: T[]): T | null {
+  return allowed.includes(value as T) ? (value as T) : null;
+}
+
+function positiveNumber(value: unknown): number | null {
+  return typeof value === "number" && Number.isFinite(value) && value >= 0 ? value : null;
+}
+
+function text(value: unknown): string | null {
+  return typeof value === "string" && value.trim() ? value.trim() : null;
+}
 
 export async function extractJob(rawJd: string): Promise<ExtractedJob> {
   const response = await generate({
@@ -76,6 +109,19 @@ export async function extractJob(rawJd: string): Promise<ExtractedJob> {
 company  — the hiring company's name.
 position — the job title as written.
 deadline — the application deadline as YYYY-MM-DD, only if an explicit date is given.
+location — where the job is, as written (e.g. "Bengaluru", "London or Remote").
+workMode — "remote", "hybrid" or "onsite", only if the JD says which.
+employmentType — "full_time", "part_time", "contract" or "internship".
+experienceMin — the minimum years of experience required, as a whole number.
+salaryRaw — the pay exactly as written (e.g. "12–18 LPA", "$90k–$120k").
+salaryMin, salaryMax — the same pay as plain numbers in full units
+  (12 LPA = 1200000; $90k = 90000). One number means min and max are equal.
+salaryCurrency — ISO code: "INR", "USD", "EUR", …
+salaryPeriod — "year", "month" or "hour".
+contactEmail — an email address the JD gives for applying or questions,
+  copied exactly.
+notes — at most two short sentences on important conditions that fit none
+  of the fields above (travel, languages, relocation, shifts, bond).
 requirements — every requirement, each with its text, whether it is a "must" or a
 "nice" to have, and the single skill it maps to (e.g. "python", "sql", "communication").
 
@@ -92,6 +138,17 @@ ${rawJd}`,
           company: { type: Type.STRING, nullable: true },
           position: { type: Type.STRING, nullable: true },
           deadline: { type: Type.STRING, nullable: true },
+          location: { type: Type.STRING, nullable: true },
+          workMode: { type: Type.STRING, enum: WORK_MODES, nullable: true },
+          employmentType: { type: Type.STRING, enum: EMPLOYMENT_TYPES, nullable: true },
+          experienceMin: { type: Type.INTEGER, nullable: true },
+          salaryRaw: { type: Type.STRING, nullable: true },
+          salaryMin: { type: Type.NUMBER, nullable: true },
+          salaryMax: { type: Type.NUMBER, nullable: true },
+          salaryCurrency: { type: Type.STRING, nullable: true },
+          salaryPeriod: { type: Type.STRING, enum: SALARY_PERIODS, nullable: true },
+          contactEmail: { type: Type.STRING, nullable: true },
+          notes: { type: Type.STRING, nullable: true },
           requirements: {
             type: Type.ARRAY,
             items: {
@@ -105,12 +162,48 @@ ${rawJd}`,
             },
           },
         },
-        required: ["company", "position", "deadline", "requirements"],
+        required: [
+          "company", "position", "deadline", "location", "workMode",
+          "employmentType", "experienceMin", "salaryRaw", "salaryMin",
+          "salaryMax", "salaryCurrency", "salaryPeriod", "contactEmail",
+          "notes", "requirements",
+        ],
       },
     },
   });
 
-  return JSON.parse(response.text ?? "{}") as ExtractedJob;
+  const raw = JSON.parse(response.text ?? "{}") as Record<string, unknown>;
+
+  // The schema asks for these shapes; this makes sure of them before the
+  // database's check constraints ever see a value.
+  const contact = text(raw.contactEmail);
+  const contactIsReal =
+    contact !== null &&
+    EMAIL.test(contact) &&
+    rawJd.toLowerCase().includes(contact.toLowerCase());
+
+  const experience = positiveNumber(raw.experienceMin);
+
+  return {
+    company: text(raw.company),
+    position: text(raw.position),
+    deadline: text(raw.deadline),
+    location: text(raw.location),
+    workMode: oneOf(raw.workMode, WORK_MODES),
+    employmentType: oneOf(raw.employmentType, EMPLOYMENT_TYPES),
+    experienceMin: experience === null ? null : Math.round(experience),
+    salaryRaw: text(raw.salaryRaw),
+    salaryMin: positiveNumber(raw.salaryMin),
+    salaryMax: positiveNumber(raw.salaryMax),
+    salaryCurrency: text(raw.salaryCurrency)?.toUpperCase() ?? null,
+    salaryPeriod: oneOf(raw.salaryPeriod, SALARY_PERIODS),
+    // Kept only if it's copied from the JD, not written by the model.
+    contactEmail: contactIsReal ? contact : null,
+    notes: text(raw.notes),
+    requirements: Array.isArray(raw.requirements)
+      ? (raw.requirements as Requirement[])
+      : [],
+  };
 }
 
 /** A search result handed to the model, numbered so it can cite it. */

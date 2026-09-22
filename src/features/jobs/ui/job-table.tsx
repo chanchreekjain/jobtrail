@@ -1,10 +1,12 @@
+import { detailsSummary, type JobDetails } from "../details";
+
 export type JobRow = {
   id?: string;
   company: string | null;
   position: string | null;
   deadline: string | null;
   requirements: { kind: "must" | "nice"; skill: string }[];
-};
+} & Partial<JobDetails>;
 
 export function JobTable({ rows }: { rows: JobRow[] }) {
   return (
@@ -14,6 +16,7 @@ export function JobTable({ rows }: { rows: JobRow[] }) {
           <tr className="border-b border-gray-300 text-left">
             <th className="py-2 pr-4 font-medium">Company</th>
             <th className="py-2 pr-4 font-medium">Position</th>
+            <th className="py-2 pr-4 font-medium">Details</th>
             <th className="py-2 pr-4 font-medium">Deadline</th>
             <th className="py-2 pr-4 font-medium">Must-have</th>
             <th className="py-2 font-medium">Nice-to-have</th>
@@ -24,6 +27,20 @@ export function JobTable({ rows }: { rows: JobRow[] }) {
             <tr key={row.id ?? i} className="border-b border-gray-200 align-top">
               <td className="py-3 pr-4">{row.company ?? "—"}</td>
               <td className="py-3 pr-4">{row.position ?? "—"}</td>
+              <td className="py-3 pr-4 min-w-48">
+                {detailsSummary(row) ?? "—"}
+                {row.contactEmail && (
+                  <a
+                    href={`mailto:${row.contactEmail}`}
+                    className="block text-blue-600 hover:underline"
+                  >
+                    {row.contactEmail}
+                  </a>
+                )}
+                {row.notes && (
+                  <span className="block text-gray-500 mt-1">{row.notes}</span>
+                )}
+              </td>
               <td className="py-3 pr-4">{row.deadline ?? "—"}</td>
               <td className="py-3 pr-4">
                 <Skills items={row.requirements.filter((r) => r.kind === "must")} />

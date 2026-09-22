@@ -1,4 +1,6 @@
 import { sql } from "@/lib/db/client";
+import { JOB_DETAIL_COLUMNS, toJobDetails } from "@/features/jobs/details-sql";
+import type { JobDetails } from "@/features/jobs/details";
 
 export type Application = {
   id: string;
@@ -8,7 +10,7 @@ export type Application = {
   source_url: string | null;
   applied_at: string | null;
   created_at: string;
-};
+} & JobDetails;
 
 export type Counts = {
   jobs: number;
@@ -28,20 +30,33 @@ export type Counts = {
  */
 
 export async function listApplications(userId: string): Promise<Application[]> {
+  // left join: an application added by hand has no job behind it, and
+  // should still show up — just with its details blank.
   const rows = await sql`
     select
-      id,
-      company,
-      role,
-      status,
-      source_url,
-      to_char(applied_at, 'YYYY-MM-DD') as applied_at,
-      created_at
-    from applications
-    where user_id = ${userId}
-    order by created_at desc
+      a.id,
+      a.company,
+      a.role,
+      a.status,
+      a.source_url,
+      to_char(a.applied_at, 'YYYY-MM-DD') as applied_at,
+      a.created_at,
+      ${JOB_DETAIL_COLUMNS}
+    from applications a
+    left join jobs j on j.id = a.job_id
+    where a.user_id = ${userId}
+    order by a.created_at desc
   `;
-  return rows as Application[];
+  return rows.map((r) => ({
+    id: r.id as string,
+    company: r.company as string | null,
+    role: r.role as string | null,
+    status: r.status as string,
+    source_url: r.source_url as string | null,
+    applied_at: r.applied_at as string | null,
+    created_at: r.created_at as string,
+    ...toJobDetails(r),
+  }));
 }
 
 export async function getCounts(userId: string): Promise<Counts> {

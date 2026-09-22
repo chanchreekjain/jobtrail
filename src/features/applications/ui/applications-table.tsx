@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useTransition } from "react";
 import { toggleApplied, changeAppliedDate } from "../actions";
 import type { Application } from "../repo";
+import { detailsSummary } from "@/features/jobs/details";
 
 function todayLocal(): string {
   // en-CA formats as YYYY-MM-DD, and this uses the browser's timezone —
@@ -40,6 +41,8 @@ export function ApplicationsTable({ rows }: { rows: Application[] }) {
           <tr className="border-b border-gray-300 text-left">
             <th className="py-2 pr-4 font-medium">Company</th>
             <th className="py-2 pr-4 font-medium">Role</th>
+            <th className="py-2 pr-4 font-medium">Details</th>
+            <th className="py-2 pr-4 font-medium">Contact</th>
             <th className="py-2 pr-4 font-medium">Applied</th>
             <th className="py-2 font-medium">Date</th>
           </tr>
@@ -64,6 +67,24 @@ export function ApplicationsTable({ rows }: { rows: Application[] }) {
                   )}
                 </td>
                 <td className="py-3 pr-4">{row.role ?? "—"}</td>
+                <td className="py-3 pr-4 min-w-48">
+                  {detailsSummary(row) ?? <span className="text-gray-400">—</span>}
+                  {row.notes && (
+                    <span className="block text-gray-500 text-xs mt-1">{row.notes}</span>
+                  )}
+                </td>
+                <td className="py-3 pr-4">
+                  {row.contactEmail ? (
+                    <a
+                      href={`mailto:${row.contactEmail}`}
+                      className="text-blue-600 hover:underline"
+                    >
+                      {row.contactEmail}
+                    </a>
+                  ) : (
+                    <span className="text-gray-400">—</span>
+                  )}
+                </td>
                 <td className="py-3 pr-4">
                   <button
                     type="button"

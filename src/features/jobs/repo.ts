@@ -1,6 +1,8 @@
 import { createHash } from "crypto";
 import { sql } from "@/lib/db/client";
 import type { ExtractedJob, Requirement } from "@/lib/ai/provider";
+import { JOB_DETAIL_COLUMNS, toJobDetails } from "./details-sql";
+import type { JobDetails } from "./details";
 
 export type SavedJob = ExtractedJob & { id: string };
 
@@ -22,7 +24,8 @@ export async function findJobByHash(
       id,
       company,
       "position",
-      to_char(deadline, 'YYYY-MM-DD') as deadline
+      to_char(deadline, 'YYYY-MM-DD') as deadline,
+      ${JOB_DETAIL_COLUMNS}
     from jobs
     where jd_hash = ${hash} and user_id = ${userId}
   `;
@@ -43,6 +46,7 @@ export async function findJobByHash(
     company: job.company,
     position: job.position,
     deadline: job.deadline,
+    ...(toJobDetails(job) as JobDetails),
     requirements: rows as Requirement[],
   };
 }
@@ -54,10 +58,18 @@ export async function saveJob(
   job: ExtractedJob,
 ): Promise<string> {
   const inserted = await sql`
-    insert into jobs (user_id, raw_jd, jd_hash, company, "position", deadline)
+    insert into jobs (
+      user_id, raw_jd, jd_hash, company, "position", deadline,
+      location, work_mode, employment_type, experience_min,
+      salary_raw, salary_min, salary_max, salary_currency, salary_period,
+      contact_email, notes
+    )
     values (
       ${userId}, ${rawJd}, ${hash},
-      ${job.company}, ${job.position}, ${job.deadline}
+      ${job.company}, ${job.position}, ${job.deadline},
+      ${job.location}, ${job.workMode}, ${job.employmentType}, ${job.experienceMin},
+      ${job.salaryRaw}, ${job.salaryMin}, ${job.salaryMax}, ${job.salaryCurrency}, ${job.salaryPeriod},
+      ${job.contactEmail}, ${job.notes}
     )
     returning id
   `;

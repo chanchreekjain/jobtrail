@@ -1,6 +1,10 @@
 import { currentUser } from "@/lib/auth/current-user";
 import { listApplications } from "@/features/applications/repo";
 import { toCsv } from "@/lib/csv";
+import {
+  workModeLabel,
+  employmentLabel,
+} from "@/features/jobs/details";
 
 /** "2026-09-22" from a timestamp, whether the driver hands us a Date or a string. */
 function day(value: string | Date | null): string {
@@ -23,12 +27,28 @@ export async function GET() {
   const applications = await listApplications(user.id);
 
   const csv = toCsv(
-    ["Company", "Role", "Status", "Applied on", "Added on"],
+    [
+      "Company", "Role", "Status", "Applied on", "Location", "Work mode",
+      "Employment type", "Min experience (yrs)", "Salary",
+      "Salary min", "Salary max", "Currency", "Per",
+      "Contact email", "Notes", "Added on",
+    ],
     applications.map((a) => [
       a.company,
       a.role,
       a.status === "applied" ? "Applied" : "Not applied",
       a.applied_at,
+      a.location,
+      workModeLabel(a),
+      employmentLabel(a),
+      a.experienceMin,
+      a.salaryRaw,
+      a.salaryMin,
+      a.salaryMax,
+      a.salaryCurrency,
+      a.salaryPeriod,
+      a.contactEmail,
+      a.notes,
       day(a.created_at),
     ]),
   );
