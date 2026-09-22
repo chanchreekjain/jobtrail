@@ -30,8 +30,11 @@ export function ResumeUpload({ hasResume }: { hasResume: boolean }) {
       </div>
       <p className="text-xs text-gray-500">
         PDF, up to 4MB. We keep what we read from it, not the file itself.
+        Reading a resume can take a minute — keep this page open.
       </p>
-      {isPending && <Working label="Reading your resume" />}
+      {isPending && (
+        <Working label="Reading your resume — this can take a minute" />
+      )}
       {state.message && !isPending && (
         <p className={`text-sm ${state.ok ? "text-green-600" : "text-red-600"}`}>
           {state.message}

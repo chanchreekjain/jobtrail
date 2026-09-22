@@ -30,7 +30,12 @@ const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
  * first isn't. Lite is smaller and a little less capable, but a slightly
  * plainer answer beats an error.
  */
-const MODELS = ["gemini-3.6-flash", "gemini-3.5-flash-lite"];
+const MODELS = [
+  "gemini-3.6-flash",
+  "gemini-3.8-flash",
+  "gemini-3.5-flash-lite",
+  "gemini-3.1-flash-lite",
+];
 
 type Request = Omit<Parameters<typeof ai.models.generateContent>[0], "model">;
 
@@ -39,11 +44,11 @@ async function generate(request: Request) {
 
   for (const model of MODELS) {
     try {
-      // Two tries per model rather than three: with a fallback waiting,
-      // there's no point making the user sit through a long backoff.
+      // One try per model: an overloaded model rarely recovers within
+      // seconds, and a different model is the better bet than waiting.
       return await withRetry(
         () => ai.models.generateContent({ ...request, model }),
-        2,
+        1,
       );
     } catch (error) {
       lastError = error;

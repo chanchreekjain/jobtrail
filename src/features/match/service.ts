@@ -33,7 +33,14 @@ export async function matchJob(userId: string, jobId: string): Promise<MatchOutc
     );
   } catch (error) {
     console.error("[match] failed:", (error as Error).message);
-    return { status: "error", message: "Couldn't score this one right now. Try again in a minute." };
+    const status = (error as { status?: number }).status;
+    return {
+      status: "error",
+      message:
+        status === 503 || status === 429
+          ? "The AI is overloaded right now. Try again in a minute."
+          : "Couldn't score this one. Try again.",
+    };
   }
 
   // Everything the resume says, lowercased, for checking the model's quotes.
