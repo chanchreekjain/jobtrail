@@ -8,8 +8,10 @@ import type { MatchSummary, RequirementResult } from "./types";
  * 3 of 4 musts and 1 of 2 nices = (2×3 + 1) / (2×4 + 2) = 7/10 = 70%.
  */
 export function summarise(results: RequirementResult[]): MatchSummary {
-  const must = results.filter((r) => r.kind === "must");
-  const nice = results.filter((r) => r.kind === "nice");
+  // Requirements a resume can't show either way don't count for or against.
+  const scored = results.filter((r) => r.assessable !== false);
+  const must = scored.filter((r) => r.kind === "must");
+  const nice = scored.filter((r) => r.kind === "nice");
   const mustMet = must.filter((r) => r.met).length;
   const niceMet = nice.filter((r) => r.met).length;
 

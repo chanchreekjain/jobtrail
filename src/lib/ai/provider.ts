@@ -411,43 +411,74 @@ isn't in the resume, return null or an empty list. Do not guess.`,
 
 export type RequirementToMatch = { n: number; text: string; skill: string };
 
-export type RawMatch = { n: number; met: boolean; evidence: string | null };
+export type MatchVerdict = "met" | "missing" | "unclear";
+
+export type RawMatch = { n: number; verdict: MatchVerdict; evidence: string[] };
+
+export type ResumeForMatch = {
+  headline: string | null;
+  skills: string[];
+  yearsExperience: number | null;
+  experience: ResumeRole[];
+  education: ResumeEducation[];
+};
+
+/** The resume as the plain text the model reads — and the text its quotes are checked against. */
+export function resumeAsText(resume: ResumeForMatch): string {
+  const roles = resume.experience.map(
+    (r) =>
+      `- ${r.title}${r.company ? ` at ${r.company}` : ""}` +
+      `${r.start || r.end ? ` (${r.start ?? "?"} – ${r.end ?? "?"})` : ""}` +
+      `${r.highlights.length ? `: ${r.highlights.join("; ")}` : ""}`,
+  );
+  const education = resume.education.map(
+    (e) =>
+      `- ${e.qualification}${e.institution ? `, ${e.institution}` : ""}${e.year ? ` (${e.year})` : ""}`,
+  );
+  return [
+    `HEADLINE: ${resume.headline ?? "(none)"}`,
+    `YEARS OF EXPERIENCE: ${resume.yearsExperience ?? "unknown"}`,
+    `SKILLS: ${resume.skills.join(", ")}`,
+    `EXPERIENCE:\n${roles.join("\n") || "(none listed)"}`,
+    `EDUCATION:\n${education.join("\n") || "(none listed)"}`,
+  ].join("\n\n");
+}
 
 /**
- * Judges each JD requirement against the resume. The model is only allowed
- * to say "met" by quoting evidence from the resume; the caller checks that
- * the quote is really there. Synonyms are the reason a model is used at
- * all — "postgres" meeting "postgresql", "react" meeting "frontend".
+ * Judges each JD requirement against the resume. "met" needs quotes the
+ * caller can find in the resume. "unclear" is for things a resume can't
+ * show either way — attitude, eagerness, communication — which are left
+ * out of the score rather than counted against the candidate.
  */
 export async function matchRequirements(
   requirements: RequirementToMatch[],
-  resume: { skills: string[]; experience: ResumeRole[] },
+  resume: ResumeForMatch,
 ): Promise<RawMatch[]> {
   const reqList = requirements.map((r) => `[${r.n}] ${r.text} (skill: ${r.skill})`).join("\n");
-  const roles = resume.experience
-    .map((r) => `- ${r.title}${r.company ? ` at ${r.company}` : ""}: ${r.highlights.join("; ")}`)
-    .join("\n");
 
   const response = await generate({
     contents: `Decide, for each numbered job requirement, whether this candidate's
 resume shows it.
 
-met — true only if the resume clearly shows the skill or an obvious
-  equivalent (e.g. "postgresql" for "postgres", "javascript" for "js").
-  Related-but-different skills do not count. When unsure, false.
-evidence — when met, the exact resume skill or a short phrase copied
-  word for word from the experience below. Null when not met.
+verdict:
+  "met"     — the resume shows it. A requirement that lists alternatives
+              ("Python, Go or C++", "a degree in CS or a related field")
+              is met by ANY ONE of them. Obvious equivalents count
+              ("postgresql" for "postgres"; a B.Tech for a bachelor's degree).
+  "missing" — the resume could show this but doesn't.
+  "unclear" — a resume can't really show it either way: attitude,
+              eagerness, curiosity, communication, teamwork, "willingness to…".
+evidence — for "met": one or more short snippets copied WORD FOR WORD from
+  the resume below, each on its own (not joined into one string). Empty
+  list otherwise.
 
 Answer every requirement number exactly once.
 
 REQUIREMENTS:
 ${reqList}
 
-RESUME SKILLS:
-${resume.skills.join(", ")}
-
-RESUME EXPERIENCE:
-${roles || "(none listed)"}`,
+RESUME:
+${resumeAsText(resume)}`,
     config: {
       responseMimeType: "application/json",
       responseSchema: {
@@ -456,10 +487,10 @@ ${roles || "(none listed)"}`,
           type: Type.OBJECT,
           properties: {
             n: { type: Type.INTEGER },
-            met: { type: Type.BOOLEAN },
-            evidence: { type: Type.STRING, nullable: true },
+            verdict: { type: Type.STRING, enum: ["met", "missing", "unclear"] },
+            evidence: { type: Type.ARRAY, items: { type: Type.STRING } },
           },
-          required: ["n", "met", "evidence"],
+          required: ["n", "verdict", "evidence"],
         },
       },
     },

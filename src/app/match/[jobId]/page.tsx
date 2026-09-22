@@ -62,6 +62,14 @@ export default async function MatchPage({
                 {resume.yearsExperience}.
               </p>
             )}
+            {outcome.match.method === "basic" && (
+              <p className="text-sm text-amber-600 pt-2">
+                Basic match: the AI was busy, so only exact skill names were
+                compared. Similar skills (like &ldquo;postgres&rdquo; and
+                &ldquo;postgresql&rdquo;) weren&apos;t counted, so the real score
+                may be higher. Reload this page later to redo it properly.
+              </p>
+            )}
             <p className="text-xs text-gray-500 pt-2">
               Must-haves count double. A requirement only counts as met when
               your resume shows it — worth checking the misses, in case your
@@ -80,8 +88,9 @@ export default async function MatchPage({
 function Checklist({ title, items }: { title: string; items: RequirementResult[] }) {
   if (items.length === 0) return null;
 
-  // Misses first: they're what the user can act on.
-  const sorted = [...items].sort((a, b) => Number(a.met) - Number(b.met));
+  // Misses first (what you can act on), then met, then the unscored ones.
+  const rank = (r: RequirementResult) => (r.assessable === false ? 2 : r.met ? 1 : 0);
+  const sorted = [...items].sort((a, b) => rank(a) - rank(b));
 
   return (
     <section>
@@ -89,14 +98,23 @@ function Checklist({ title, items }: { title: string; items: RequirementResult[]
       <ul className="space-y-2">
         {sorted.map((r, i) => (
           <li key={i} className="flex gap-3 text-sm">
-            <span
-              aria-label={r.met ? "Met" : "Not met"}
-              className={r.met ? "text-green-600" : "text-red-600"}
-            >
-              {r.met ? "✓" : "✗"}
-            </span>
+            {r.assessable === false ? (
+              <span aria-label="Not scored" className="text-gray-400">–</span>
+            ) : (
+              <span
+                aria-label={r.met ? "Met" : "Not met"}
+                className={r.met ? "text-green-600" : "text-red-600"}
+              >
+                {r.met ? "✓" : "✗"}
+              </span>
+            )}
             <span>
               {r.text}
+              {r.assessable === false && (
+                <span className="block text-xs text-gray-500">
+                  Not scored — a resume can&apos;t really show this. Worth a line in your cover letter.
+                </span>
+              )}
               {r.evidence && (
                 <span className="block text-xs text-gray-500">
                   Your resume: &ldquo;{r.evidence}&rdquo;

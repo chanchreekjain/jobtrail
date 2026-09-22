@@ -36,7 +36,7 @@ export async function findJobForMatch(
 export async function findMatch(jobId: string, resumeId: string): Promise<Match | null> {
   const rows = await sql`
     select
-      results, score,
+      results, score, method,
       must_met as "mustMet", must_total as "mustTotal",
       nice_met as "niceMet", nice_total as "niceTotal"
     from matches
@@ -54,12 +54,12 @@ export async function saveMatch(
   await sql`
     insert into matches (
       user_id, job_id, resume_id, results,
-      must_met, must_total, nice_met, nice_total, score
+      must_met, must_total, nice_met, nice_total, score, method
     )
     values (
       ${userId}, ${jobId}, ${resumeId}, ${JSON.stringify(match.results)}::jsonb,
       ${match.mustMet}, ${match.mustTotal}, ${match.niceMet}, ${match.niceTotal},
-      ${match.score}
+      ${match.score}, ${match.method}
     )
     on conflict (job_id, resume_id) do update
       set results    = excluded.results,
@@ -68,6 +68,7 @@ export async function saveMatch(
           nice_met   = excluded.nice_met,
           nice_total = excluded.nice_total,
           score      = excluded.score,
+          method     = excluded.method,
           created_at = now()
   `;
 }

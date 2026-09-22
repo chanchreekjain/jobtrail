@@ -16,6 +16,7 @@ export type Application = {
   match_scored: boolean;
   must_met: number | null;
   must_total: number | null;
+  match_method: "ai" | "basic" | null;
 } & JobDetails;
 
 export type Counts = {
@@ -52,6 +53,7 @@ export async function listApplications(userId: string): Promise<Application[]> {
       m.score as match_score,
       m.must_met,
       m.must_total,
+      m.method as match_method,
       ${JOB_DETAIL_COLUMNS}
     from applications a
     left join jobs j on j.id = a.job_id
@@ -80,6 +82,7 @@ export async function listApplications(userId: string): Promise<Application[]> {
     match_score: r.match_score as number | null,
     must_met: r.must_met as number | null,
     must_total: r.must_total as number | null,
+    match_method: (r.match_method as "ai" | "basic" | null) ?? null,
     ...toJobDetails(r),
   }));
 }

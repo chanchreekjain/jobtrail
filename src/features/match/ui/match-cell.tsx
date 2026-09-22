@@ -30,6 +30,7 @@ export function MatchCell({ row, hasResume }: { row: Application; hasResume: boo
             <strong>{row.match_score}%</strong>{" "}
             <span className="text-xs text-gray-500">
               {row.must_met}/{row.must_total} must
+              {row.match_method === "basic" && " · basic"}
             </span>
           </>
         )}
