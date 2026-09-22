@@ -16,6 +16,7 @@ export async function Nav() {
       <Link href="/pipeline" className="hover:underline">Pipeline</Link>
       <Link href="/jd" className="hover:underline">Paste a JD</Link>
       <Link href="/history" className="hover:underline">History</Link>
+      <Link href="/resume" className="hover:underline">Resume</Link>
 
       <div className="ml-auto flex items-center gap-3 text-sm">
         {user?.email ? (

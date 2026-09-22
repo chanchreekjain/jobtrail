@@ -288,3 +288,118 @@ ${numbered}`,
 
   return JSON.parse(response.text ?? "{}") as CompanySummary;
 }
+
+export type ResumeRole = {
+  title: string;
+  company: string | null;
+  start: string | null;
+  end: string | null;
+  highlights: string[];
+};
+
+export type ResumeEducation = {
+  qualification: string;
+  institution: string | null;
+  year: string | null;
+};
+
+export type ExtractedResume = {
+  headline: string | null;
+  skills: string[];
+  yearsExperience: number | null;
+  experience: ResumeRole[];
+  education: ResumeEducation[];
+};
+
+/**
+ * Reads a resume PDF directly — Gemini accepts the file itself, so there's
+ * no separate PDF-to-text step to go wrong on columns or tables.
+ */
+export async function extractResume(pdfBase64: string): Promise<ExtractedResume> {
+  const response = await generate({
+    contents: [
+      {
+        role: "user",
+        parts: [
+          {
+            text: `Extract structured data from this resume.
+
+headline — one line: current or target role and seniority, as the resume
+  presents it.
+skills — every skill the resume shows, each as a short lowercase name
+  ("python", "sql", "react", "stakeholder management"). One skill per entry,
+  no duplicates. Include skills evidenced in project or job descriptions,
+  not only a skills section.
+yearsExperience — total years of paid work experience, from the dates given.
+  Internships count as their actual length. Null if dates are missing.
+experience — each role: title, company, start and end as written, and up
+  to three short highlights.
+education — each qualification: the degree or course, institution, year.
+
+Do not include contact details, addresses or phone numbers. If something
+isn't in the resume, return null or an empty list. Do not guess.`,
+          },
+          { inlineData: { mimeType: "application/pdf", data: pdfBase64 } },
+        ],
+      },
+    ],
+    config: {
+      responseMimeType: "application/json",
+      responseSchema: {
+        type: Type.OBJECT,
+        properties: {
+          headline: { type: Type.STRING, nullable: true },
+          skills: { type: Type.ARRAY, items: { type: Type.STRING } },
+          yearsExperience: { type: Type.NUMBER, nullable: true },
+          experience: {
+            type: Type.ARRAY,
+            items: {
+              type: Type.OBJECT,
+              properties: {
+                title: { type: Type.STRING },
+                company: { type: Type.STRING, nullable: true },
+                start: { type: Type.STRING, nullable: true },
+                end: { type: Type.STRING, nullable: true },
+                highlights: { type: Type.ARRAY, items: { type: Type.STRING } },
+              },
+              required: ["title", "company", "start", "end", "highlights"],
+            },
+          },
+          education: {
+            type: Type.ARRAY,
+            items: {
+              type: Type.OBJECT,
+              properties: {
+                qualification: { type: Type.STRING },
+                institution: { type: Type.STRING, nullable: true },
+                year: { type: Type.STRING, nullable: true },
+              },
+              required: ["qualification", "institution", "year"],
+            },
+          },
+        },
+        required: ["headline", "skills", "yearsExperience", "experience", "education"],
+      },
+    },
+  });
+
+  const raw = JSON.parse(response.text ?? "{}") as Record<string, unknown>;
+
+  // Normalise skills the same way every time: lowercase, trimmed, deduped.
+  const skills = Array.isArray(raw.skills)
+    ? [...new Set(
+        (raw.skills as unknown[])
+          .filter((s): s is string => typeof s === "string")
+          .map((s) => s.trim().toLowerCase())
+          .filter(Boolean),
+      )]
+    : [];
+
+  return {
+    headline: text(raw.headline),
+    skills,
+    yearsExperience: positiveNumber(raw.yearsExperience),
+    experience: Array.isArray(raw.experience) ? (raw.experience as ResumeRole[]) : [],
+    education: Array.isArray(raw.education) ? (raw.education as ResumeEducation[]) : [],
+  };
+}
