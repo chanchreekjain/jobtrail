@@ -3,6 +3,8 @@ import { requireUser } from "@/lib/auth/current-user";
 import { currentPlan } from "@/lib/plans";
 import { countLookupsThisWeek } from "@/features/intel/repo";
 import { setTheme } from "@/features/account/actions";
+import { auth } from "@/auth";
+import { ProfileForm } from "@/features/account/ui/profile-form";
 import { THEME_COOKIE, THEMES, parseTheme, type Theme } from "@/features/account/theme";
 
 const THEME_LABEL: Record<Theme, string> = {
@@ -16,6 +18,7 @@ export default async function SettingsPage() {
   const theme = parseTheme((await cookies()).get(THEME_COOKIE)?.value);
   const plan = currentPlan();
   const lookupsUsed = await countLookupsThisWeek(user.id);
+  const googleName = (await auth())?.user?.name ?? null;
 
   return (
     <main className="min-h-screen p-12 max-w-2xl space-y-12">
@@ -49,8 +52,8 @@ export default async function SettingsPage() {
       </section>
 
       <section>
-        <h2 className="text-lg font-semibold mb-1">Profile</h2>
-        <p className="text-sm text-gray-500">Coming next — name and picture.</p>
+        <h2 className="text-lg font-semibold mb-4">Profile</h2>
+        <ProfileForm displayName={user.displayName} googleName={googleName} />
       </section>
 
       <section>

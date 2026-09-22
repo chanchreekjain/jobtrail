@@ -2,7 +2,14 @@ import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { sql } from "@/lib/db/client";
 
-export type CurrentUser = { id: string; email: string };
+export type CurrentUser = {
+  id: string;
+  email: string;
+  /** The name to show: theirs if they set one, otherwise Google's. */
+  name: string | null;
+  /** Only what they typed in Settings — null if they never did. */
+  displayName: string | null;
+};
 
 /**
  * The signed-in user's database row, created on their first visit.
@@ -20,7 +27,13 @@ export async function currentUser(): Promise<CurrentUser | null> {
   if (!email) return null;
 
   const found = await sql`
-    select id, email from users where email = ${email}
+    select
+      id,
+      email,
+      coalesce(display_name, name) as name,
+      display_name as "displayName"
+    from users
+    where email = ${email}
   `;
   if (found.length > 0) return found[0] as CurrentUser;
 
@@ -34,7 +47,11 @@ export async function currentUser(): Promise<CurrentUser | null> {
     on conflict (email) do update
       set name  = excluded.name,
           image = excluded.image
-    returning id, email
+    returning
+      id,
+      email,
+      coalesce(display_name, name) as name,
+      display_name as "displayName"
   `;
   return created[0] as CurrentUser;
 }
