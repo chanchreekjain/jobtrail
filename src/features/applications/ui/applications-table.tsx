@@ -44,7 +44,10 @@ export function ApplicationsTable({ rows }: { rows: Application[] }) {
             <th className="py-2 pr-4 font-medium">Details</th>
             <th className="py-2 pr-4 font-medium">Contact</th>
             <th className="py-2 pr-4 font-medium">Applied</th>
-            <th className="py-2 font-medium">Date</th>
+            <th className="py-2 pr-4 font-medium">Date</th>
+            <th className="py-2 font-medium">
+              <span className="sr-only">Actions</span>
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -53,19 +56,7 @@ export function ApplicationsTable({ rows }: { rows: Application[] }) {
 
             return (
               <tr key={row.id} className="border-b border-gray-200">
-                <td className="py-3 pr-4">
-                  {row.company ? (
-                    <Link
-                      href={`/research?company=${encodeURIComponent(row.company)}`}
-                      className="hover:underline"
-                      title="Research this company"
-                    >
-                      {row.company}
-                    </Link>
-                  ) : (
-                    "—"
-                  )}
-                </td>
+                <td className="py-3 pr-4">{row.company ?? "—"}</td>
                 <td className="py-3 pr-4">{row.role ?? "—"}</td>
                 <td className="py-3 pr-4 min-w-48">
                   {detailsSummary(row) ?? <span className="text-gray-400">—</span>}
@@ -108,7 +99,7 @@ export function ApplicationsTable({ rows }: { rows: Application[] }) {
                     />
                   </button>
                 </td>
-                <td className="py-3">
+                <td className="py-3 pr-4">
                   {applied ? (
                     <input
                       type="date"
@@ -125,6 +116,16 @@ export function ApplicationsTable({ rows }: { rows: Application[] }) {
                     />
                   ) : (
                     <span className="text-gray-400">—</span>
+                  )}
+                </td>
+                <td className="py-3">
+                  {row.company && (
+                    <Link
+                      href={`/research?company=${encodeURIComponent(row.company)}`}
+                      className="border border-gray-400 rounded px-3 py-1 text-xs whitespace-nowrap hover:bg-gray-500/10"
+                    >
+                      Research
+                    </Link>
                   )}
                 </td>
               </tr>
