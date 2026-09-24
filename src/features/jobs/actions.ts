@@ -29,7 +29,9 @@ export async function analyseJd(_prev: JdState, formData: FormData): Promise<JdS
       job: existing,
       error: null,
       cached: true,
-      match: await matchJob(user.id, existing.id),
+      // force: pasting a JD is a deliberate "score this now", and the
+      // resume may have changed since the last time it was scored.
+      match: await matchJob(user.id, existing.id, true),
     };
   }
 
@@ -42,7 +44,7 @@ export async function analyseJd(_prev: JdState, formData: FormData): Promise<JdS
       cached: false,
       // Extraction worked, so the AI is answering — score it now, while
       // it is. A failure here doesn't lose the extraction.
-      match: await matchJob(user.id, id),
+      match: await matchJob(user.id, id, true),
     };
   } catch {
     return {
