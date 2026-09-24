@@ -18,13 +18,28 @@ import type { Section } from "./section-nav";
 export function SectionMenu({ sections }: { sections: Section[] }) {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  // The pill only shows while you're actually scrolling, then fades out.
+  const [moving, setMoving] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 280);
+    let idle: ReturnType<typeof setTimeout>;
+
+    const onScroll = () => {
+      setScrolled(window.scrollY > 280);
+      setMoving(true);
+      // Each scroll event pushes the hide back, so it disappears about a
+      // second after you stop rather than blinking on every flick.
+      clearTimeout(idle);
+      idle = setTimeout(() => setMoving(false), 1100);
+    };
+
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      clearTimeout(idle);
+    };
   }, []);
 
   useEffect(() => {
@@ -82,7 +97,7 @@ export function SectionMenu({ sections }: { sections: Section[] }) {
         )}
       </div>
 
-      {/* Floating: same list, reachable from anywhere down the page. */}
+      {/* Floating: appears while scrolling, and stays while it's open. */}
       {scrolled && (
         <>
           <button
@@ -90,7 +105,11 @@ export function SectionMenu({ sections }: { sections: Section[] }) {
             onClick={() => setOpen((o) => !o)}
             aria-haspopup="true"
             aria-expanded={open}
-            className="border-line bg-surface fixed bottom-20 left-1/2 z-40 flex -translate-x-1/2 items-center gap-2 rounded-full border px-4 py-2.5 text-sm shadow-lg"
+            // Faded out and click-through when idle, so it never sits on
+            // top of what you're reading.
+            className={`border-line bg-surface fixed bottom-20 left-1/2 z-40 flex -translate-x-1/2 items-center gap-2 rounded-full border px-4 py-2.5 text-sm shadow-lg transition-opacity duration-300 ${
+              moving || open ? "opacity-100" : "pointer-events-none opacity-0"
+            }`}
           >
             <MenuIcon />
             On this page
