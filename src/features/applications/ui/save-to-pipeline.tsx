@@ -26,27 +26,27 @@ export function SaveToPipeline({
 
       {company === null && (
         <label className="flex flex-col gap-1 max-w-sm">
-          <span className="text-sm text-gray-500">
+          <span className="text-sm text-muted">
             This JD didn&apos;t name a company — what should we call it?
           </span>
           <input
             name="company"
             required
             placeholder="Company"
-            className="border border-gray-400 rounded px-3 py-2 bg-transparent"
+            className="border border-line-strong rounded-[var(--radius)] px-3 py-2 bg-transparent"
           />
         </label>
       )}
 
       {position === null && (
         <label className="flex flex-col gap-1 max-w-sm">
-          <span className="text-sm text-gray-500">
+          <span className="text-sm text-muted">
             No job title found — add one if you like.
           </span>
           <input
             name="position"
             placeholder="Position (optional)"
-            className="border border-gray-400 rounded px-3 py-2 bg-transparent"
+            className="border border-line-strong rounded-[var(--radius)] px-3 py-2 bg-transparent"
           />
         </label>
       )}
@@ -55,12 +55,12 @@ export function SaveToPipeline({
         <button
           type="submit"
           disabled={isSaving}
-          className="border border-gray-400 rounded px-4 py-2 w-fit disabled:opacity-50"
+          className="border border-line-strong rounded-[var(--radius)] px-4 py-2 w-fit disabled:opacity-50"
         >
           {isSaving ? "Saving…" : "Save to pipeline"}
         </button>
         {state.message && (
-          <span className={`text-sm ${state.ok ? "text-gray-500" : "text-red-500"}`}>
+          <span className={`text-sm ${state.ok ? "text-muted" : "text-negative"}`}>
             {state.message}
           </span>
         )}

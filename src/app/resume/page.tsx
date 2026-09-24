@@ -10,7 +10,7 @@ export default async function ResumePage() {
     <main className="min-h-screen p-12 max-w-3xl space-y-10">
       <div>
         <h1 className="text-2xl font-bold mb-2">Resume</h1>
-        <p className="text-gray-500">
+        <p className="text-muted">
           Upload your resume and we&apos;ll compare it against every JD you save.
         </p>
       </div>
@@ -19,7 +19,7 @@ export default async function ResumePage() {
 
       {resume && (
         <section className="space-y-6">
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-muted">
             From <strong>{resume.fileName}</strong>, uploaded{" "}
             {new Date(resume.createdAt).toLocaleDateString()}. Check it — if
             something&apos;s wrong here, the match scores will be wrong too.
@@ -37,7 +37,7 @@ export default async function ResumePage() {
             <h2 className="font-semibold mb-2">Skills ({resume.skills.length})</h2>
             <div className="flex flex-wrap gap-1">
               {resume.skills.map((s) => (
-                <span key={s} className="border border-gray-300 rounded px-2 py-0.5 text-xs">
+                <span key={s} className="border border-line rounded-[var(--radius)] px-2 py-0.5 text-xs">
                   {s}
                 </span>
               ))}
@@ -55,7 +55,7 @@ export default async function ResumePage() {
                       {r.company ? ` — ${r.company}` : ""}
                     </p>
                     {(r.start || r.end) && (
-                      <p className="text-sm text-gray-500">
+                      <p className="text-sm text-muted">
                         {r.start ?? "?"} – {r.end ?? "?"}
                       </p>
                     )}

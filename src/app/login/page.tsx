@@ -27,7 +27,7 @@ export default async function LoginPage({
   return (
     <main className="min-h-screen p-12 max-w-sm">
       <h1 className="text-2xl font-bold mb-2">Sign in</h1>
-      <p className="text-gray-500 mb-6">
+      <p className="text-muted mb-6">
         So your pipeline follows you across devices.
       </p>
 
@@ -39,7 +39,7 @@ export default async function LoginPage({
       >
         <button
           type="submit"
-          className="border border-gray-400 rounded px-4 py-2 w-full hover:bg-gray-100 hover:text-black transition-colors"
+          className="border border-line-strong rounded-[var(--radius)] px-4 py-2 w-full hover:bg-surface-2 transition-colors"
         >
           Continue with Google
         </button>

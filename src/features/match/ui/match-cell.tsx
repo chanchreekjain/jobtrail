@@ -25,16 +25,23 @@ function ReloadIcon() {
   );
 }
 
+/** Colour carries meaning here, so it's worth using: strong / fair / weak. */
+function scoreColour(score: number) {
+  if (score >= 70) return "text-positive";
+  if (score >= 40) return "text-text";
+  return "text-negative";
+}
+
 export function MatchCell({ row, hasResume }: { row: Application; hasResume: boolean }) {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
   // Added by hand, with no JD behind it: nothing to compare against.
-  if (!row.job_id) return <span className="text-gray-400">—</span>;
+  if (!row.job_id) return <span className="text-faint">—</span>;
 
   if (!hasResume) {
     return (
-      <Link href="/resume" className="text-xs text-blue-600 hover:underline">
+      <Link href="/resume" className="text-xs text-accent hover:underline">
         Upload resume
       </Link>
     );
@@ -55,9 +62,11 @@ export function MatchCell({ row, hasResume }: { row: Application; hasResume: boo
           <>
             <Link href={`/match/${row.job_id}`} className="hover:underline" title="See the breakdown">
               {row.match_score === null ? (
-                <span className="text-gray-500">—</span>
+                <span className="text-muted">—</span>
               ) : (
-                <strong>{row.match_score}%</strong>
+                <strong className={`tabular ${scoreColour(row.match_score)}`}>
+                  {row.match_score}%
+                </strong>
               )}
             </Link>
             {/* Score stays visible while it re-runs, so the row doesn't
@@ -68,7 +77,7 @@ export function MatchCell({ row, hasResume }: { row: Application; hasResume: boo
               disabled={isPending}
               aria-label="Re-score"
               title="Re-score against your current resume"
-              className={`text-gray-500 hover:text-blue-600 disabled:opacity-50 ${
+              className={`text-muted hover:text-accent disabled:opacity-50 ${
                 isPending ? "animate-spin" : ""
               }`}
             >
@@ -80,13 +89,13 @@ export function MatchCell({ row, hasResume }: { row: Application; hasResume: boo
             type="button"
             onClick={() => run(false)}
             disabled={isPending}
-            className="border border-gray-400 rounded px-3 py-1 text-xs hover:bg-gray-500/10 disabled:opacity-50"
+            className="border border-line-strong rounded-[var(--radius)] px-3 py-1 text-xs hover:bg-surface-2 disabled:opacity-50"
           >
             {isPending ? "Scoring…" : "Score"}
           </button>
         )}
       </div>
-      {error && <p className="text-xs text-red-600 whitespace-normal">{error}</p>}
+      {error && <p className="text-xs text-negative whitespace-normal">{error}</p>}
     </div>
   );
 }

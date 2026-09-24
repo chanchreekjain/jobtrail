@@ -1,6 +1,8 @@
+import Link from "next/link";
 import { listJobHistory } from "@/features/jobs/repo";
 import { currentPlan } from "@/lib/plans";
 import { requireUser } from "@/lib/auth/current-user";
+import { Card, Empty, Page } from "@/components/ui";
 
 export default async function HistoryPage() {
   const user = await requireUser();
@@ -9,38 +11,46 @@ export default async function HistoryPage() {
   const hidden = total - rows.length;
 
   return (
-    <main className="min-h-screen p-12 max-w-3xl">
-      <h1 className="text-2xl font-bold mb-6">History</h1>
-
-      {rows.length === 0 && (
-        <p className="text-gray-500">
-          Nothing yet — paste a JD to get started.
-        </p>
+    <Page
+      title="History"
+      description="Every JD you've analysed."
+      width="narrow"
+    >
+      {rows.length === 0 ? (
+        <Empty>
+          Nothing yet —{" "}
+          <Link href="/jd" className="text-accent hover:underline">paste a JD</Link>{" "}
+          to get started.
+        </Empty>
+      ) : (
+        <ul className="space-y-3">
+          {rows.map((job) => (
+            <li key={job.id}>
+              <Card className="p-4 transition-colors hover:border-line-strong">
+                <Link href={`/jd?job=${job.id}`} className="block">
+                  <p className="font-medium">
+                    {job.company ?? "Unknown company"}
+                    {job.position ? ` — ${job.position}` : ""}
+                  </p>
+                  <p className="mt-1 text-sm text-muted">{job.preview}…</p>
+                  <p className="mt-2 text-xs text-faint tabular">
+                    {new Date(job.created_at).toLocaleDateString()} ·{" "}
+                    {job.requirement_count} requirements
+                  </p>
+                </Link>
+              </Card>
+            </li>
+          ))}
+        </ul>
       )}
 
-      <ul className="space-y-4">
-        {rows.map((job) => (
-          <li key={job.id} className="border border-gray-300 rounded p-4">
-            <p className="text-sm text-gray-500 mb-1">
-              {new Date(job.created_at).toLocaleDateString()} ·{" "}
-              {job.requirement_count} requirements
-            </p>
-            <p className="font-medium">
-              {job.company ?? "Unknown company"}
-              {job.position ? ` — ${job.position}` : ""}
-            </p>
-            <p className="text-sm text-gray-500 mt-1">{job.preview}…</p>
-          </li>
-        ))}
-      </ul>
-
       {hidden > 0 && (
-        <p className="mt-6 text-sm text-gray-500">
+        <p className="mt-6 text-sm text-muted">
           {hidden} older {hidden === 1 ? "JD is" : "JDs are"} saved but hidden on
           the {plan.label} plan, which shows the most recent {plan.historyLimit}.
           Nothing has been deleted.
         </p>
       )}
-    </main>
+    </Page>
   );
 }

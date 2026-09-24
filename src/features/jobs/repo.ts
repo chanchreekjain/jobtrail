@@ -145,16 +145,18 @@ export async function listJobHistory(
   const rows = await sql`
     select
       j.id,
-      j.company,
-      j."position",
+      -- A name the user fixed on their application wins over the JD's.
+      coalesce(a.company, j.company) as company,
+      coalesce(a.role, j."position") as "position",
       to_char(j.deadline, 'YYYY-MM-DD') as deadline,
       left(j.raw_jd, 120) as preview,
       count(r.id)::int as requirement_count,
       j.created_at
     from jobs j
     left join requirements r on r.job_id = j.id
+    left join applications a on a.job_id = j.id and a.user_id = ${userId}
     where j.user_id = ${userId}
-    group by j.id
+    group by j.id, a.company, a.role
     order by j.created_at desc
     limit ${limit}
   `;

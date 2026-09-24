@@ -27,21 +27,21 @@ export function ProfileForm({
           defaultValue={displayName ?? ""}
           placeholder={googleName ?? "Your name"}
           maxLength={60}
-          className="flex-1 border border-gray-400 rounded px-3 py-2 bg-transparent"
+          className="flex-1 border border-line-strong rounded-[var(--radius)] px-3 py-2 bg-transparent"
         />
         <button
           type="submit"
           disabled={isPending}
-          className="bg-blue-600 text-white rounded px-4 py-2 disabled:opacity-50"
+          className="bg-accent text-accent-text rounded-[var(--radius)] px-4 py-2 disabled:opacity-50"
         >
           {isPending ? "Saving…" : "Save"}
         </button>
       </div>
-      <p className="text-xs text-gray-500">
+      <p className="text-xs text-muted">
         Leave it empty to use your Google name.
       </p>
       {state.message && (
-        <p className={`text-sm ${state.ok ? "text-green-600" : "text-red-600"}`}>
+        <p className={`text-sm ${state.ok ? "text-positive" : "text-negative"}`}>
           {state.message}
         </p>
       )}

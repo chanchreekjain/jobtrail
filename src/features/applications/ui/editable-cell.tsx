@@ -37,10 +37,10 @@ export function EditableCell({
           }
           startTransition(async () => setError(await save(next)));
         }}
-        className={`w-full min-w-32 rounded border px-2 py-1 bg-transparent disabled:opacity-50
-          ${error ? "border-red-500" : "border-transparent hover:border-gray-400 focus:border-gray-400"}`}
+        className={`w-full min-w-32 rounded-[var(--radius)] border px-2 py-1 bg-transparent disabled:opacity-50
+          ${error ? "border-negative" : "border-transparent hover:border-line-strong focus:border-line-strong"}`}
       />
-      {error && <p className="text-xs text-red-600 mt-1">{error}</p>}
+      {error && <p className="text-xs text-negative mt-1">{error}</p>}
     </div>
   );
 }

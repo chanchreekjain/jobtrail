@@ -18,17 +18,17 @@ export function ResumeUpload({ hasResume }: { hasResume: boolean }) {
           name="resume"
           accept="application/pdf,.pdf"
           required
-          className="text-sm file:mr-3 file:rounded file:border file:border-gray-400 file:bg-transparent file:px-3 file:py-1.5 file:text-sm"
+          className="text-sm file:mr-3 file:rounded-[var(--radius)] file:border file:border-line-strong file:bg-transparent file:px-3 file:py-1.5 file:text-sm"
         />
         <button
           type="submit"
           disabled={isPending}
-          className="bg-blue-600 text-white rounded px-4 py-2 disabled:opacity-50"
+          className="bg-accent text-accent-text rounded-[var(--radius)] px-4 py-2 disabled:opacity-50"
         >
           {hasResume ? "Replace resume" : "Upload resume"}
         </button>
       </div>
-      <p className="text-xs text-gray-500">
+      <p className="text-xs text-muted">
         PDF, up to 4MB. We keep what we read from it, not the file itself.
         Reading a resume can take a minute — keep this page open.
       </p>
@@ -36,7 +36,7 @@ export function ResumeUpload({ hasResume }: { hasResume: boolean }) {
         <Working label="Reading your resume — this can take a minute" />
       )}
       {state.message && !isPending && (
-        <p className={`text-sm ${state.ok ? "text-green-600" : "text-red-600"}`}>
+        <p className={`text-sm ${state.ok ? "text-positive" : "text-negative"}`}>
           {state.message}
         </p>
       )}

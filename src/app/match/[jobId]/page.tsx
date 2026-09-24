@@ -30,10 +30,10 @@ export default async function MatchPage({
     <main className="min-h-screen p-12 max-w-3xl space-y-8">
       <div>
         <div className="flex gap-4 text-sm">
-          <Link href={`/jd?job=${jobId}`} className="text-gray-500 hover:underline">
+          <Link href={`/jd?job=${jobId}`} className="text-muted hover:underline">
             ← Back to this JD
           </Link>
-          <Link href="/pipeline" className="text-gray-500 hover:underline">
+          <Link href="/pipeline" className="text-muted hover:underline">
             Pipeline
           </Link>
         </div>
@@ -45,7 +45,7 @@ export default async function MatchPage({
 
       {outcome.status === "no-resume" && (
         <p>
-          <Link href="/resume" className="text-blue-600 hover:underline">
+          <Link href="/resume" className="text-accent hover:underline">
             Upload your resume
           </Link>{" "}
           to see how you match.
@@ -53,39 +53,39 @@ export default async function MatchPage({
       )}
 
       {outcome.status === "unavailable" && (
-        <p className="text-gray-500">
+        <p className="text-muted">
           The AI is busy right now, so this one isn&apos;t scored yet. Reload in
           a minute.
         </p>
       )}
 
-      {outcome.status === "error" && <p className="text-red-600">{outcome.message}</p>}
+      {outcome.status === "error" && <p className="text-negative">{outcome.message}</p>}
 
       {outcome.status === "ok" && (
         <>
-          <div className="border border-gray-300 rounded p-4 space-y-1">
+          <div className="border border-line rounded-[var(--radius)] p-4 space-y-1">
             <p className="text-3xl font-semibold">
               {outcome.match.score === null ? "—" : `${outcome.match.score}%`}
             </p>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-muted">
               {outcome.match.mustMet} of {outcome.match.mustTotal} must-haves ·{" "}
               {outcome.match.niceMet} of {outcome.match.niceTotal} nice-to-haves
             </p>
             {job.experienceMin != null && resume?.yearsExperience != null && (
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-muted">
                 Asks for {job.experienceMin}+ years; your resume shows about{" "}
                 {resume.yearsExperience}.
               </p>
             )}
             {outcome.match.method === "basic" && (
-              <p className="text-sm text-amber-600 pt-2">
+              <p className="text-sm text-warning pt-2">
                 Basic match: the AI was busy, so only exact skill names were
                 compared. Similar skills (like &ldquo;postgres&rdquo; and
                 &ldquo;postgresql&rdquo;) weren&apos;t counted, so the real score
                 may be higher. Reload this page later to redo it properly.
               </p>
             )}
-            <p className="text-xs text-gray-500 pt-2">
+            <p className="text-xs text-muted pt-2">
               Must-haves count double. A requirement only counts as met when
               your resume shows it — worth checking the misses, in case your
               resume undersells you.
@@ -118,11 +118,11 @@ function Checklist({ title, items }: { title: string; items: RequirementResult[]
         {sorted.map((r, i) => (
           <li key={i} className="flex gap-3 text-sm">
             {r.assessable === false ? (
-              <span aria-label="Not scored" className="text-gray-400">–</span>
+              <span aria-label="Not scored" className="text-faint">–</span>
             ) : (
               <span
                 aria-label={r.met ? "Met" : "Not met"}
-                className={r.met ? "text-green-600" : "text-red-600"}
+                className={r.met ? "text-positive" : "text-negative"}
               >
                 {r.met ? "✓" : "✗"}
               </span>
@@ -130,12 +130,12 @@ function Checklist({ title, items }: { title: string; items: RequirementResult[]
             <span>
               {r.text}
               {r.assessable === false && (
-                <span className="block text-xs text-gray-500">
+                <span className="block text-xs text-muted">
                   Not scored — a resume can&apos;t really show this. Worth a line in your cover letter.
                 </span>
               )}
               {r.evidence && (
-                <span className="block text-xs text-gray-500">
+                <span className="block text-xs text-muted">
                   Your resume: &ldquo;{r.evidence}&rdquo;
                 </span>
               )}

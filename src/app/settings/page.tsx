@@ -26,7 +26,7 @@ export default async function SettingsPage() {
 
       <section>
         <h2 className="text-lg font-semibold mb-1">Appearance</h2>
-        <p className="text-sm text-gray-500 mb-4">Saved on this device.</p>
+        <p className="text-sm text-muted mb-4">Saved on this device.</p>
 
         {/* One form, three submit buttons: the one clicked sends its own
             name/value pair, so no JavaScript is needed. */}
@@ -39,10 +39,10 @@ export default async function SettingsPage() {
               value={t}
               role="radio"
               aria-checked={theme === t}
-              className={`rounded border px-4 py-2 text-sm ${
+              className={`rounded-[var(--radius)] border px-4 py-2 text-sm ${
                 theme === t
-                  ? "border-blue-600 ring-1 ring-blue-600"
-                  : "border-gray-400 hover:bg-gray-500/10"
+                  ? "border-accent ring-1 ring-accent"
+                  : "border-line-strong hover:bg-surface-2"
               }`}
             >
               {THEME_LABEL[t]}
@@ -58,18 +58,18 @@ export default async function SettingsPage() {
 
       <section>
         <h2 className="text-lg font-semibold mb-4">Plan</h2>
-        <div className="border border-gray-300 rounded p-4 space-y-2 text-sm">
+        <div className="border border-line rounded-[var(--radius)] p-4 space-y-2 text-sm">
           <p>
             You&apos;re on the <strong>{plan.label}</strong> plan.
           </p>
-          <ul className="text-gray-500 space-y-1">
+          <ul className="text-muted space-y-1">
             <li>History shows your last {plan.historyLimit} JDs</li>
             <li>
               Company research: {Math.min(lookupsUsed, plan.intelPerWeek)} of{" "}
               {plan.intelPerWeek} lookups used in the last 7 days
             </li>
           </ul>
-          <p className="text-gray-500 pt-2">Paid plans aren&apos;t available yet.</p>
+          <p className="text-muted pt-2">Paid plans aren&apos;t available yet.</p>
         </div>
       </section>
     </main>

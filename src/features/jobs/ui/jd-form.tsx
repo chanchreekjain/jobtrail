@@ -37,12 +37,12 @@ export function JdForm({
           rows={12}
           defaultValue={initialText}
           required
-          className="border border-gray-400 rounded px-3 py-2 bg-transparent"
+          className="border border-line-strong rounded-[var(--radius)] px-3 py-2 bg-transparent"
         />
         <button
           type="submit"
           disabled={isPending}
-          className="bg-blue-600 text-white rounded px-4 py-2 w-fit disabled:opacity-50"
+          className="bg-accent text-accent-text rounded-[var(--radius)] px-4 py-2 w-fit disabled:opacity-50"
         >
           {isPending ? "Extracting…" : "Extract"}
         </button>
@@ -52,10 +52,10 @@ export function JdForm({
         <Working label="Reading the JD, then scoring it against your resume" />
       )}
 
-      {state.error && <p className="text-red-500">{state.error}</p>}
+      {state.error && <p className="text-negative">{state.error}</p>}
 
       {state.cached && (
-        <p className="text-sm text-gray-500">Loaded from database — no API call.</p>
+        <p className="text-sm text-muted">Loaded from database — no API call.</p>
       )}
 
       {job && (

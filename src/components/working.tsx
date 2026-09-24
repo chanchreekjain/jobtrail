@@ -20,10 +20,10 @@ export function Working({ label }: { label: string }) {
   }, []);
 
   return (
-    <div role="status" aria-live="polite" className="flex items-center gap-3 text-sm text-gray-500">
+    <div role="status" aria-live="polite" className="flex items-center gap-3 text-sm text-muted">
       <span
         aria-hidden="true"
-        className="h-4 w-4 rounded-full border-2 border-gray-300 border-t-blue-600 animate-spin"
+        className="h-4 w-4 rounded-full border-2 border-line border-t-blue-600 animate-spin"
       />
       <span>
         {label}… {seconds}s

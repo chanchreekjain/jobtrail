@@ -44,12 +44,12 @@ export function ResearchPanel({ initialCompany }: { initialCompany: string }) {
           defaultValue={state.company}
           placeholder="Company name"
           required
-          className="flex-1 border border-gray-400 rounded px-3 py-2 bg-transparent"
+          className="flex-1 border border-line-strong rounded-[var(--radius)] px-3 py-2 bg-transparent"
         />
         <button
           type="submit"
           disabled={isPending}
-          className="bg-blue-600 text-white rounded px-4 py-2 disabled:opacity-50"
+          className="bg-accent text-accent-text rounded-[var(--radius)] px-4 py-2 disabled:opacity-50"
         >
           {isPending ? "Researching…" : "Research"}
         </button>
@@ -62,7 +62,7 @@ export function ResearchPanel({ initialCompany }: { initialCompany: string }) {
       )}
 
       {result?.status === "error" && (
-        <p className="text-red-600">{result.message}</p>
+        <p className="text-negative">{result.message}</p>
       )}
 
       {result?.status === "suggest" && (
@@ -77,7 +77,7 @@ export function ResearchPanel({ initialCompany }: { initialCompany: string }) {
               <button
                 type="submit"
                 disabled={isPending}
-                className="bg-blue-600 text-white rounded px-4 py-2 disabled:opacity-50"
+                className="bg-accent text-accent-text rounded-[var(--radius)] px-4 py-2 disabled:opacity-50"
               >
                 Yes, show {result.suggestion}
               </button>
@@ -88,7 +88,7 @@ export function ResearchPanel({ initialCompany }: { initialCompany: string }) {
               <button
                 type="submit"
                 disabled={isPending}
-                className="border border-gray-400 rounded px-4 py-2 disabled:opacity-50"
+                className="border border-line-strong rounded-[var(--radius)] px-4 py-2 disabled:opacity-50"
               >
                 No, research &ldquo;{result.typed}&rdquo; (uses a lookup)
               </button>
@@ -98,7 +98,7 @@ export function ResearchPanel({ initialCompany }: { initialCompany: string }) {
       )}
 
       {result?.status === "limit" && (
-        <p className="text-gray-500 mb-6">
+        <p className="text-muted mb-6">
           You&apos;ve used this week&apos;s research lookups. Companies someone
           has already researched still load for free, and the links below
           always work.
@@ -122,7 +122,7 @@ export function ResearchPanel({ initialCompany }: { initialCompany: string }) {
                   <a
                     href={fact.sourceUrl}
                     {...external}
-                    className="text-blue-600 hover:underline"
+                    className="text-accent hover:underline"
                   >
                     ({hostOf(fact.sourceUrl)})
                   </a>
@@ -138,7 +138,7 @@ export function ResearchPanel({ initialCompany }: { initialCompany: string }) {
                 <a
                   href={result.intel.data.careersUrl}
                   {...external}
-                  className="text-blue-600 hover:underline"
+                  className="text-accent hover:underline"
                 >
                   {hostOf(result.intel.data.careersUrl)}
                 </a>
@@ -149,7 +149,7 @@ export function ResearchPanel({ initialCompany }: { initialCompany: string }) {
                 Recruiting contact:{" "}
                 <a
                   href={`mailto:${result.intel.data.recruitingContact}`}
-                  className="text-blue-600 hover:underline"
+                  className="text-accent hover:underline"
                 >
                   {result.intel.data.recruitingContact}
                 </a>
@@ -157,7 +157,7 @@ export function ResearchPanel({ initialCompany }: { initialCompany: string }) {
             )}
           </div>
 
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-muted">
             {result.cached
               ? `Already researched on ${new Date(result.intel.fetchedAt).toLocaleDateString()} — didn't use a lookup.`
               : "Freshly researched."}{" "}
@@ -171,11 +171,11 @@ export function ResearchPanel({ initialCompany }: { initialCompany: string }) {
           <a
             href={linkedInPeopleUrl(state.company)}
             {...external}
-            className="text-blue-600 hover:underline"
+            className="text-accent hover:underline"
           >
             People at {state.company} on LinkedIn →
           </a>{" "}
-          <span className="text-gray-500">
+          <span className="text-muted">
             Filter by your connections or your college to find a referral.
           </span>
         </p>
