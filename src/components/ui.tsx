@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ComponentProps, ReactNode } from "react";
 import { SectionNav, type Section } from "./section-nav";
+import { SectionMenu } from "./section-menu";
 
 /**
  * The small set of pieces every page is built from. Having them in one
@@ -90,15 +91,7 @@ export function Page({
         {actions && <div className="flex flex-wrap gap-2">{actions}</div>}
       </header>
 
-      {sections && (
-        // Sits directly under the sticky header, as a sibling of the
-        // content rather than inside it: a sticky element only sticks
-        // within its own parent's box, so nesting it beside the sections
-        // made it scroll away with them.
-        <div className="border-line bg-bg/95 sticky top-[3.25rem] z-10 -mx-6 mb-4 border-y px-6 backdrop-blur sm:top-14 sm:-mx-8 sm:px-8 lg:hidden">
-          <SectionNav sections={sections} horizontal />
-        </div>
-      )}
+      {sections && <SectionMenu sections={sections} />}
 
       {sections ? (
         <div className="lg:grid lg:grid-cols-[1fr_11rem] lg:gap-10">
