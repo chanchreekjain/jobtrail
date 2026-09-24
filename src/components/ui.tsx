@@ -79,7 +79,9 @@ export function Page({
 }) {
   return (
     <main
-      className={`mx-auto w-full px-6 py-10 sm:px-8 sm:py-14 ${
+      // flex-1 so the footer sits directly under the content instead of
+      // being pushed down by leftover height.
+      className={`mx-auto w-full flex-1 px-6 py-10 sm:px-8 sm:py-14 ${
         width === "narrow" ? "max-w-2xl" : "max-w-5xl"
       }`}
     >

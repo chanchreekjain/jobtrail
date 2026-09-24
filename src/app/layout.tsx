@@ -33,9 +33,13 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       lang="en"
       // "system" sets no attribute, so the CSS media query decides.
       data-theme={theme === "system" ? undefined : theme}
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      // No h-full here: with html at 100% height, a phone's collapsing
+      // address bar leaves a strip of empty page below the footer.
+      className={`${geistSans.variable} ${geistMono.variable} antialiased`}
     >
-      <body className="bg-bg text-text flex min-h-full flex-col">
+      {/* dvh follows the visible viewport as the address bar hides;
+          overflow-x-hidden stops a wide table dragging the page sideways. */}
+      <body className="bg-bg text-text flex min-h-dvh flex-col overflow-x-hidden">
         <Nav />
         {children}
         <Footer />
