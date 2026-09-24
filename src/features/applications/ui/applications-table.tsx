@@ -14,6 +14,7 @@ import { detailsSummary } from "@/features/jobs/details";
 import { MatchCell } from "@/features/match/ui/match-cell";
 import { EditableCell } from "./editable-cell";
 import { ButtonLink, Card, Empty } from "@/components/ui";
+import { AddApplication } from "./add-application";
 import { DeleteButton } from "@/components/delete-button";
 
 function todayLocal(): string {
@@ -54,9 +55,15 @@ export function ApplicationsTable({
         <p className="mt-1">
           Paste a job description and save it here to start tracking.
         </p>
-        <ButtonLink href="/jd" size="sm" variant="primary" className="mt-4">
-          Paste a JD
-        </ButtonLink>
+        <div className="mt-4 flex flex-wrap justify-center gap-2">
+          <ButtonLink href="/jd" size="sm" variant="primary">
+            Paste a JD
+          </ButtonLink>
+          <AddApplication />
+        </div>
+        <p className="text-faint mt-3 text-xs">
+          Pasting a JD gets you a match score. Adding by hand just tracks it.
+        </p>
       </Empty>
     );
   }

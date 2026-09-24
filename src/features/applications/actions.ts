@@ -19,23 +19,33 @@ function refresh() {
   revalidatePath("/applications");
 }
 
-export async function addApplication(formData: FormData) {
+export type AddState = { message: string | null; ok: boolean };
+
+/**
+ * Track a job with no JD behind it. Plenty of applications start from a
+ * referral or a conversation, and those shouldn't need a job description
+ * pasted in before they can be tracked.
+ */
+export async function addApplication(
+  _prev: AddState,
+  formData: FormData,
+): Promise<AddState> {
   const user = await requireUser();
 
   const company = String(formData.get("company") ?? "").trim();
   const role = String(formData.get("role") ?? "").trim();
-  const sourceUrl = String(formData.get("source_url") ?? "").trim();
 
-  if (!company || !role) return;
+  if (!company) return { message: "A company name is enough to start.", ok: false };
 
   await insertApplication({
     userId: user.id,
-    company,
-    role,
-    source_url: sourceUrl || null,
+    company: company.slice(0, 200),
+    role: role.slice(0, 200),
+    source_url: null,
   });
 
   refresh();
+  return { message: `Added ${company}.`, ok: true };
 }
 
 export type PipelineState = {

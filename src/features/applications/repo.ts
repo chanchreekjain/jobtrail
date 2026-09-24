@@ -114,7 +114,9 @@ export async function insertApplication(input: {
 }): Promise<void> {
   await sql`
     insert into applications (user_id, company, role, source_url)
-    values (${input.userId}, ${input.company}, ${input.role}, ${input.source_url})
+    values (
+      ${input.userId}, ${input.company}, ${input.role || null}, ${input.source_url}
+    )
   `;
 }
 

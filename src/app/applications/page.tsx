@@ -3,6 +3,7 @@ import { ApplicationsTable } from "@/features/applications/ui/applications-table
 import { requireUser } from "@/lib/auth/current-user";
 import { findCurrentResume } from "@/features/resume/repo";
 import { ButtonLink, Page } from "@/components/ui";
+import { AddApplication } from "@/features/applications/ui/add-application";
 
 export default async function ApplicationsPage() {
   const user = await requireUser();
@@ -15,6 +16,7 @@ export default async function ApplicationsPage() {
       description={`${applications.length} ${applications.length === 1 ? "application" : "applications"}`}
       actions={
         <>
+          <AddApplication />
           <ButtonLink href="/research" size="sm">
             Research a company
           </ButtonLink>
