@@ -1,81 +1,91 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Section } from "./section-nav";
 
 /**
- * Jump links on a phone, as a button that opens a sheet.
+ * In-page contents on small screens: a labelled button at the top of the
+ * page, just under the heading, that drops down the list of sections.
  *
- * It's fixed to the viewport rather than sticky, because sticky depends
- * on where it sits in the page and on browser quirks — on a real phone
- * the pinned row scrolled away. Fixed always stays put.
+ * Placed inline rather than floating — the government and docs-site
+ * convention is an in-page table of contents directly below the H1, and
+ * it sits in the easy-to-reach middle band of a phone screen rather than
+ * a corner.
  */
 export function SectionMenu({ sections }: { sections: Section[] }) {
   const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!open) return;
+    const onClick = (e: MouseEvent) => {
+      if (!ref.current?.contains(e.target as Node)) setOpen(false);
+    };
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") setOpen(false);
     };
+    document.addEventListener("mousedown", onClick);
     document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onClick);
+      document.removeEventListener("keydown", onKey);
+    };
   }, [open]);
 
   return (
-    <div className="lg:hidden">
+    <div ref={ref} className="relative mb-6 lg:hidden">
       <button
         type="button"
-        onClick={() => setOpen(true)}
-        aria-haspopup="dialog"
+        onClick={() => setOpen((o) => !o)}
+        aria-haspopup="true"
         aria-expanded={open}
-        className="border-line bg-surface text-text fixed right-4 bottom-20 z-40 flex h-12 w-12 items-center justify-center rounded-full border shadow-lg"
-        aria-label="Jump to a section"
+        className="border-line bg-surface flex w-full items-center justify-between rounded-[var(--radius)] border px-4 py-3 text-sm"
       >
+        <span className="flex items-center gap-2">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            aria-hidden="true"
+          >
+            <path d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+          On this page
+        </span>
         <svg
-          width="20"
-          height="20"
+          width="16"
+          height="16"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
           strokeWidth="2"
           strokeLinecap="round"
+          strokeLinejoin="round"
           aria-hidden="true"
+          className={`transition-transform ${open ? "rotate-180" : ""}`}
         >
-          <path d="M4 6h16M4 12h16M4 18h16" />
+          <path d="m6 9 6 6 6-6" />
         </svg>
       </button>
 
       {open && (
-        <>
-          {/* Tapping anywhere off the sheet closes it. */}
-          <button
-            type="button"
-            aria-label="Close"
-            onClick={() => setOpen(false)}
-            className="fixed inset-0 z-40 bg-black/40"
-          />
-          <div
-            role="dialog"
-            aria-label="Jump to a section"
-            className="border-line bg-surface fixed inset-x-0 bottom-0 z-50 rounded-t-2xl border-t p-4 pb-6 shadow-lg"
-          >
-            <p className="text-faint mb-2 text-xs tracking-wide uppercase">Jump to</p>
-            <ul className="divide-line divide-y">
-              {sections.map((s) => (
-                <li key={s.id}>
-                  <a
-                    href={`#${s.id}`}
-                    onClick={() => setOpen(false)}
-                    className="block py-3 text-sm"
-                  >
-                    {s.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </>
+        <ul className="border-line bg-surface divide-line absolute inset-x-0 top-full z-30 mt-1 divide-y rounded-[var(--radius)] border shadow-lg">
+          {sections.map((s) => (
+            <li key={s.id}>
+              <a
+                href={`#${s.id}`}
+                onClick={() => setOpen(false)}
+                className="block px-4 py-3 text-sm"
+              >
+                {s.label}
+              </a>
+            </li>
+          ))}
+        </ul>
       )}
     </div>
   );
