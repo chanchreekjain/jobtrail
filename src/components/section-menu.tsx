@@ -31,7 +31,10 @@ export function SectionMenu({ sections }: { sections: Section[] }) {
     if (!el) return;
     const observer = new IntersectionObserver(
       ([entry]) => setPast(!entry.isIntersecting),
-      { threshold: 0 },
+      // Counts as gone once it's within ~100px of the top, rather than
+      // fully off screen — the handover happens as it slides under the
+      // header instead of a moment later.
+      { threshold: 0, rootMargin: "-100px 0px 0px 0px" },
     );
     observer.observe(el);
     return () => observer.disconnect();
