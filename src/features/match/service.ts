@@ -2,6 +2,7 @@ import { matchRequirements, resumeAsText } from "@/lib/ai/provider";
 import { findCurrentResume } from "@/features/resume/repo";
 import { findJobForMatch, findMatch, saveMatch } from "./repo";
 import { summarise } from "./score";
+import { hasAiBudget, recordAiCall } from "@/lib/usage";
 import type { Match, RequirementResult } from "./types";
 
 export type MatchOutcome =
@@ -33,6 +34,8 @@ export async function matchJob(
     await saveMatch(userId, jobId, resume.id, match);
     return { status: "ok", match };
   }
+
+  if (!(await hasAiBudget(userId))) return { status: "unavailable" };
 
   let raw;
   try {
@@ -92,5 +95,6 @@ export async function matchJob(
 
   const match: Match = { ...summarise(results), results, method: "ai" };
   await saveMatch(userId, jobId, resume.id, match);
+  await recordAiCall(userId, "match");
   return { status: "ok", match };
 }

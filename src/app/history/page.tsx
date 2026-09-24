@@ -3,6 +3,8 @@ import { listJobHistory } from "@/features/jobs/repo";
 import { currentPlan } from "@/lib/plans";
 import { requireUser } from "@/lib/auth/current-user";
 import { Card, Empty, Page } from "@/components/ui";
+import { DeleteButton } from "@/components/delete-button";
+import { removeJob } from "@/features/jobs/actions";
 
 export default async function HistoryPage() {
   const user = await requireUser();
@@ -36,6 +38,15 @@ export default async function HistoryPage() {
                     {job.requirement_count} requirements
                   </p>
                 </Link>
+                <div className="border-line mt-3 border-t pt-3">
+                  <DeleteButton
+                    confirm="Deletes its score and any saved application too."
+                    onDelete={async () => {
+                      "use server";
+                      await removeJob(job.id);
+                    }}
+                  />
+                </div>
               </Card>
             </li>
           ))}

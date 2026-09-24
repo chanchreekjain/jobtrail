@@ -3,7 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { requireUser } from "@/lib/auth/current-user";
 import { extractResume } from "@/lib/ai/provider";
-import { saveResume } from "./repo";
+import { saveResume, deleteResume } from "./repo";
+import { hasAiBudget, recordAiCall } from "@/lib/usage";
 
 export type UploadState = { message: string | null; ok: boolean };
 
@@ -35,6 +36,13 @@ export async function uploadResume(
     return { message: "That doesn't look like a PDF.", ok: false };
   }
 
+  if (!(await hasAiBudget(user.id))) {
+    return {
+      message: "You've used today's AI allowance. Try again tomorrow.",
+      ok: false,
+    };
+  }
+
   try {
     const resume = await extractResume(bytes.toString("base64"));
     if (resume.skills.length === 0 && resume.experience.length === 0) {
@@ -45,6 +53,7 @@ export async function uploadResume(
       };
     }
     await saveResume(user.id, file.name.slice(0, 200), resume);
+    await recordAiCall(user.id, "resume");
   } catch (error) {
     console.error("[resume] extract failed:", (error as Error).message);
     return { message: "Couldn't read the resume. Try again in a minute.", ok: false };
@@ -52,4 +61,11 @@ export async function uploadResume(
 
   revalidatePath("/resume");
   return { message: "Resume read and saved.", ok: true };
+}
+
+export async function removeResume(id: string): Promise<void> {
+  const user = await requireUser();
+  await deleteResume(user.id, id);
+  revalidatePath("/resume");
+  revalidatePath("/");
 }

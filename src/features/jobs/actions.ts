@@ -2,8 +2,10 @@
 
 import { extractJob } from "@/lib/ai/provider";
 import { requireUser } from "@/lib/auth/current-user";
-import { hashJd, findJobByHash, saveJob, type SavedJob } from "./repo";
+import { revalidatePath } from "next/cache";
+import { hashJd, findJobByHash, saveJob, deleteJob, type SavedJob } from "./repo";
 import { matchJob, type MatchOutcome } from "@/features/match/service";
+import { hasAiBudget, recordAiCall } from "@/lib/usage";
 
 export type JdState = {
   job: SavedJob | null;
@@ -40,9 +42,19 @@ export async function analyseJd(_prev: JdState, formData: FormData): Promise<JdS
     };
   }
 
+  if (!(await hasAiBudget(user.id))) {
+    return {
+      job: null,
+      error: "You've used today's AI allowance. It resets 24 hours after each use.",
+      cached: false,
+      match: null,
+    };
+  }
+
   try {
     const job = await extractJob(rawJd);
     const id = await saveJob(user.id, rawJd, hash, job);
+    await recordAiCall(user.id, "extract");
     return {
       job: { ...job, id },
       error: null,
@@ -59,4 +71,12 @@ export async function analyseJd(_prev: JdState, formData: FormData): Promise<JdS
       match: null,
     };
   }
+}
+
+export async function removeJob(id: string): Promise<void> {
+  const user = await requireUser();
+  await deleteJob(user.id, id);
+  revalidatePath("/history");
+  revalidatePath("/applications");
+  revalidatePath("/");
 }

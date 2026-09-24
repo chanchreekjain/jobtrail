@@ -62,3 +62,14 @@ export async function updateDisplayName(
     ok: true,
   };
 }
+
+/**
+ * Deletes the account and everything attached to it. Every table's
+ * user_id says "on delete cascade", so removing this one row removes the
+ * jobs, applications, resumes, scores and usage log with it.
+ */
+export async function deleteAccount(): Promise<void> {
+  const user = await requireUser();
+  await sql`delete from users where id = ${user.id}`;
+  await signOut({ redirectTo: "/login" });
+}

@@ -45,3 +45,8 @@ export async function saveResume(
     )
   `;
 }
+
+/** Removes a resume and, by cascade, every match score based on it. */
+export async function deleteResume(userId: string, id: string): Promise<void> {
+  await sql`delete from resumes where id = ${id} and user_id = ${userId}`;
+}

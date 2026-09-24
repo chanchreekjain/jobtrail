@@ -2,6 +2,8 @@ import { requireUser } from "@/lib/auth/current-user";
 import { findCurrentResume } from "@/features/resume/repo";
 import { ResumeUpload } from "@/features/resume/ui/resume-upload";
 import { Card, Empty, Page, Tag } from "@/components/ui";
+import { DeleteButton } from "@/components/delete-button";
+import { removeResume } from "@/features/resume/actions";
 
 export default async function ResumePage() {
   const user = await requireUser();

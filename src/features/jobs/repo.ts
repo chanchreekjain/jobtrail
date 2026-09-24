@@ -170,3 +170,13 @@ export async function listJobHistory(
     total: totals[0].total as number,
   };
 }
+
+/**
+ * Deletes a saved JD. Its requirements, match scores and the application
+ * that came from it go too — the database does that through the
+ * "on delete cascade" rules, so there's nothing left pointing at a job
+ * that no longer exists.
+ */
+export async function deleteJob(userId: string, id: string): Promise<void> {
+  await sql`delete from jobs where id = ${id} and user_id = ${userId}`;
+}

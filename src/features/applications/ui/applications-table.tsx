@@ -7,12 +7,14 @@ import {
   changeAppliedDate,
   updateCompany,
   updateContactEmail,
+  removeApplication,
 } from "../actions";
 import type { Application } from "../repo";
 import { detailsSummary } from "@/features/jobs/details";
 import { MatchCell } from "@/features/match/ui/match-cell";
 import { EditableCell } from "./editable-cell";
 import { ButtonLink, Card, Empty } from "@/components/ui";
+import { DeleteButton } from "@/components/delete-button";
 
 function todayLocal(): string {
   // en-CA formats as YYYY-MM-DD, and this uses the browser's timezone —
@@ -68,6 +70,9 @@ export function ApplicationsTable({
             <th className="px-3 py-2.5 font-medium">Date</th>
             <th className="px-3 py-2.5 font-medium">
               <span className="sr-only">Actions</span>
+            </th>
+            <th className="px-3 py-2.5 font-medium">
+              <span className="sr-only">Delete</span>
             </th>
           </tr>
         </thead>
@@ -152,6 +157,12 @@ export function ApplicationsTable({
                       Research
                     </Link>
                   )}
+                </td>
+                <td className="px-3 py-2.5">
+                  <DeleteButton
+                    confirm="Remove this application?"
+                    onDelete={() => removeApplication(row.id)}
+                  />
                 </td>
               </tr>
             );

@@ -11,6 +11,7 @@ import {
   updateAppliedDate,
   setContactEmail,
   setCompany,
+  deleteApplication,
 } from "./repo";
 
 function refresh() {
@@ -143,4 +144,10 @@ export async function updateCompany(id: string, value: string): Promise<string |
   await setCompany(user.id, id, company || null);
   refresh();
   return null;
+}
+
+export async function removeApplication(id: string): Promise<void> {
+  const user = await requireUser();
+  await deleteApplication(user.id, id);
+  refresh();
 }

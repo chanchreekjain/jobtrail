@@ -212,3 +212,7 @@ export async function setCompany(
     where id = ${id} and user_id = ${userId}
   `;
 }
+
+export async function deleteApplication(userId: string, id: string): Promise<void> {
+  await sql`delete from applications where id = ${id} and user_id = ${userId}`;
+}

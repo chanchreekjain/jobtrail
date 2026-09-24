@@ -1,6 +1,7 @@
 import { searchWeb } from "@/lib/search/tavily";
 import { summariseCompany, type NumberedSource } from "@/lib/ai/provider";
 import { currentPlan } from "@/lib/plans";
+import { hasAiBudget, recordAiCall } from "@/lib/usage";
 import {
   companyKey,
   findFreshIntel,
@@ -56,6 +57,7 @@ export async function researchCompany(
   }
 
   if (used >= limit) return { status: "limit", remaining: 0 };
+  if (!(await hasAiBudget(userId))) return { status: "limit", remaining: 0 };
 
   let sources: NumberedSource[];
   try {
@@ -102,6 +104,7 @@ export async function researchCompany(
   // spelled properly.
   await saveIntel(companyKey(canonical), canonical, data);
   await recordLookup(userId, key);
+  await recordAiCall(userId, "intel");
 
   return {
     status: "ok",

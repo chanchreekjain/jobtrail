@@ -6,6 +6,9 @@ import { setTheme } from "@/features/account/actions";
 import { auth } from "@/auth";
 import { ProfileForm } from "@/features/account/ui/profile-form";
 import { Card, Page } from "@/components/ui";
+import { DeleteButton } from "@/components/delete-button";
+import { deleteAccount } from "@/features/account/actions";
+import { aiCallsToday } from "@/lib/usage";
 import { THEME_COOKIE, THEMES, parseTheme, type Theme } from "@/features/account/theme";
 
 const THEME_LABEL: Record<Theme, string> = {
@@ -19,6 +22,7 @@ export default async function SettingsPage() {
   const theme = parseTheme((await cookies()).get(THEME_COOKIE)?.value);
   const plan = currentPlan();
   const lookupsUsed = await countLookupsThisWeek(user.id);
+  const aiUsed = await aiCallsToday(user.id);
   const googleName = (await auth())?.user?.name ?? null;
 
   return (
@@ -76,6 +80,19 @@ export default async function SettingsPage() {
             </ul>
             <p className="text-muted pt-2">Paid plans aren&apos;t available yet.</p>
           </div>
+        </Card>
+
+        <Card className="border-negative/40 p-5">
+          <h2 className="font-medium">Delete account</h2>
+          <p className="text-muted mt-1 mb-4 text-sm">
+            Removes your account and everything in it — saved JDs, applications, scores
+            and your resume details. This can&apos;t be undone.
+          </p>
+          <DeleteButton
+            label="Delete my account"
+            confirm="Everything goes, permanently."
+            onDelete={deleteAccount}
+          />
         </Card>
       </div>
     </Page>

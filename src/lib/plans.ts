@@ -7,16 +7,31 @@ export type Plan = {
   historyLimit: number;
   /** Company lookups that spend a search credit, per rolling 7 days. */
   intelPerWeek: number;
+  /** All AI calls — extraction, scoring, resume reading — per rolling day. */
+  aiCallsPerDay: number;
 };
 
 export const PLANS: Record<PlanId, Plan> = {
-  free: { id: "free", label: "Free", historyLimit: 25, intelPerWeek: 10 },
-  pro: { id: "pro", label: "Pro", historyLimit: 250, intelPerWeek: 50 },
+  free: {
+    id: "free",
+    label: "Free",
+    historyLimit: 25,
+    intelPerWeek: 10,
+    aiCallsPerDay: 40,
+  },
+  pro: {
+    id: "pro",
+    label: "Pro",
+    historyLimit: 250,
+    intelPerWeek: 50,
+    aiCallsPerDay: 200,
+  },
   unlimited: {
     id: "unlimited",
     label: "Unlimited",
     historyLimit: 10_000,
     intelPerWeek: 200,
+    aiCallsPerDay: 1_000,
   },
 };
 
