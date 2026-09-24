@@ -17,27 +17,44 @@ import type { Section } from "./section-nav";
  */
 export function SectionMenu({ sections }: { sections: Section[] }) {
   const [open, setOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-  // The pill only shows while you're actually scrolling, then fades out.
-  const [moving, setMoving] = useState(false);
+  // True once the inline button has scrolled out of view above.
+  const [past, setPast] = useState(false);
+  // The pill shows while you're scrolling or touching, then fades out.
+  const [awake, setAwake] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const inlineRef = useRef<HTMLDivElement>(null);
 
+  // The pill takes over exactly when the inline button leaves the screen,
+  // rather than at a guessed scroll distance that's wrong on some phones.
+  useEffect(() => {
+    const el = inlineRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setPast(!entry.isIntersecting),
+      { threshold: 0 },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  // Awake while scrolling or touching; asleep about a second after both
+  // stop. Each event pushes the sleep back, so it doesn't blink.
   useEffect(() => {
     let idle: ReturnType<typeof setTimeout>;
 
-    const onScroll = () => {
-      setScrolled(window.scrollY > 280);
-      setMoving(true);
-      // Each scroll event pushes the hide back, so it disappears about a
-      // second after you stop rather than blinking on every flick.
+    const wake = () => {
+      setAwake(true);
       clearTimeout(idle);
-      idle = setTimeout(() => setMoving(false), 1100);
+      idle = setTimeout(() => setAwake(false), 1100);
     };
 
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("scroll", wake, { passive: true });
+    window.addEventListener("touchstart", wake, { passive: true });
+    window.addEventListener("pointerdown", wake, { passive: true });
     return () => {
-      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("scroll", wake);
+      window.removeEventListener("touchstart", wake);
+      window.removeEventListener("pointerdown", wake);
       clearTimeout(idle);
     };
   }, []);
@@ -77,12 +94,12 @@ export function SectionMenu({ sections }: { sections: Section[] }) {
   return (
     <div ref={ref} className="lg:hidden">
       {/* Inline: the table of contents in its conventional place. */}
-      <div className="relative mb-6">
+      <div ref={inlineRef} className="relative mb-6">
         <button
           type="button"
           onClick={() => setOpen((o) => !o)}
           aria-haspopup="true"
-          aria-expanded={open && !scrolled}
+          aria-expanded={open && !past}
           className="border-line bg-surface flex w-full items-center justify-between rounded-[var(--radius)] border px-4 py-3 text-sm"
         >
           <span className="flex items-center gap-2">
@@ -92,13 +109,13 @@ export function SectionMenu({ sections }: { sections: Section[] }) {
           <ChevronIcon open={open} />
         </button>
 
-        {open && !scrolled && (
+        {open && !past && (
           <div className="absolute inset-x-0 top-full z-30 mt-1">{list}</div>
         )}
       </div>
 
       {/* Floating: appears while scrolling, and stays while it's open. */}
-      {scrolled && (
+      {past && (
         <>
           <button
             type="button"
@@ -107,8 +124,8 @@ export function SectionMenu({ sections }: { sections: Section[] }) {
             aria-expanded={open}
             // Faded out and click-through when idle, so it never sits on
             // top of what you're reading.
-            className={`border-line bg-surface fixed bottom-20 left-1/2 z-40 flex -translate-x-1/2 items-center gap-2 rounded-full border px-4 py-2.5 text-sm shadow-lg transition-opacity duration-300 ${
-              moving || open ? "opacity-100" : "pointer-events-none opacity-0"
+            className={`border-line bg-surface fixed bottom-20 left-1/2 z-40 flex -translate-x-1/2 items-center gap-2 rounded-full border px-4 py-2.5 text-sm shadow-lg transition-opacity duration-500 ${
+              awake || open ? "opacity-100" : "pointer-events-none opacity-0"
             }`}
           >
             <MenuIcon />
