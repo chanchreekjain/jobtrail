@@ -12,6 +12,7 @@ import {
   setContactEmail,
   setCompany,
   setDetailsNote,
+  setRole,
   deleteApplication,
 } from "./repo";
 
@@ -169,6 +170,16 @@ export async function updateDetails(id: string, value: string): Promise<string |
   const note = value.trim().slice(0, 300);
 
   await setDetailsNote(user.id, id, note || null);
+  refresh();
+  return null;
+}
+
+/** The job title on this application. Empty clears it. */
+export async function updateRole(id: string, value: string): Promise<string | null> {
+  const user = await requireUser();
+  const role = value.trim().slice(0, 200);
+
+  await setRole(user.id, id, role || null);
   refresh();
   return null;
 }

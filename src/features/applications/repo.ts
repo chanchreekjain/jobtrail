@@ -234,3 +234,15 @@ export async function setDetailsNote(
     where id = ${id} and user_id = ${userId}
   `;
 }
+
+export async function setRole(
+  userId: string,
+  id: string,
+  role: string | null,
+): Promise<void> {
+  await sql`
+    update applications
+    set role = ${role}
+    where id = ${id} and user_id = ${userId}
+  `;
+}

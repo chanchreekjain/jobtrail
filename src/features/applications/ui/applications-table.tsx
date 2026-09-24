@@ -8,6 +8,7 @@ import {
   updateCompany,
   updateContactEmail,
   updateDetails,
+  updateRole,
   removeApplication,
 } from "../actions";
 import type { Application } from "../repo";
@@ -113,7 +114,13 @@ export function ApplicationsTable({
                       save={(v) => updateCompany(row.id, v)}
                     />
                   </td>
-                  <td className="px-3 py-2.5">{row.role ?? "—"}</td>
+                  <td className="px-3 py-2.5">
+                    <EditableCell
+                      value={row.role}
+                      placeholder="Role"
+                      save={(v) => updateRole(row.id, v)}
+                    />
+                  </td>
                   <td className="px-3 py-2.5 whitespace-nowrap">
                     <MatchCell row={row} hasResume={hasResume} />
                   </td>
@@ -234,9 +241,11 @@ function MobileList({
                   placeholder="Company"
                   save={(v) => updateCompany(row.id, v)}
                 />
-                <p className="text-muted truncate px-2 text-sm">
-                  {row.role ?? "No title"}
-                </p>
+                <EditableCell
+                  value={row.role}
+                  placeholder="Role"
+                  save={(v) => updateRole(row.id, v)}
+                />
               </div>
               <MatchCell row={row} hasResume={hasResume} />
             </div>
