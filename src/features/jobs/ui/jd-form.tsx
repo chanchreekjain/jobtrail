@@ -7,6 +7,7 @@ import type { MatchOutcome } from "@/features/match/service";
 import { JobTable } from "./job-table";
 import { MatchResult } from "@/features/match/ui/match-result";
 import { SaveToPipeline } from "@/features/applications/ui/save-to-pipeline";
+import { buttonClass, Card } from "@/components/ui";
 import { Working } from "@/components/working";
 
 const blankState: JdState = { job: null, error: null, cached: false, match: null };
@@ -34,15 +35,16 @@ export function JdForm({
       <form action={formAction} className="flex flex-col gap-3">
         <textarea
           name="raw_jd"
-          rows={12}
+          rows={14}
           defaultValue={initialText}
           required
-          className="border border-line-strong rounded-[var(--radius)] px-3 py-2 bg-transparent"
+          placeholder="Paste the job description here…"
+          className="w-full rounded-[var(--radius)] border border-line-strong bg-surface px-3 py-2.5 text-sm leading-relaxed placeholder:text-faint"
         />
         <button
           type="submit"
           disabled={isPending}
-          className="bg-accent text-accent-text rounded-[var(--radius)] px-4 py-2 w-fit disabled:opacity-50"
+          className={buttonClass({ variant: "primary" })}
         >
           {isPending ? "Extracting…" : "Extract"}
         </button>
@@ -60,7 +62,9 @@ export function JdForm({
 
       {job && (
         <div className="flex flex-col gap-4">
-          <JobTable rows={[job]} />
+          <Card className="overflow-x-auto p-1">
+            <JobTable rows={[job]} />
+          </Card>
 
           {state.match && <MatchResult outcome={state.match} jobId={job.id} />}
 

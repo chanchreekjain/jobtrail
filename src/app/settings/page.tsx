@@ -5,6 +5,7 @@ import { countLookupsThisWeek } from "@/features/intel/repo";
 import { setTheme } from "@/features/account/actions";
 import { auth } from "@/auth";
 import { ProfileForm } from "@/features/account/ui/profile-form";
+import { Card, Page } from "@/components/ui";
 import { THEME_COOKIE, THEMES, parseTheme, type Theme } from "@/features/account/theme";
 
 const THEME_LABEL: Record<Theme, string> = {
@@ -21,12 +22,12 @@ export default async function SettingsPage() {
   const googleName = (await auth())?.user?.name ?? null;
 
   return (
-    <main className="min-h-screen p-12 max-w-2xl space-y-12">
-      <h1 className="text-2xl font-bold">Settings</h1>
+    <Page title="Settings" width="narrow">
+      <div className="space-y-8">
 
-      <section>
-        <h2 className="text-lg font-semibold mb-1">Appearance</h2>
-        <p className="text-sm text-muted mb-4">Saved on this device.</p>
+      <Card className="p-5">
+        <h2 className="font-medium">Appearance</h2>
+        <p className="mt-1 mb-4 text-sm text-muted">Saved on this device.</p>
 
         {/* One form, three submit buttons: the one clicked sends its own
             name/value pair, so no JavaScript is needed. */}
@@ -49,16 +50,16 @@ export default async function SettingsPage() {
             </button>
           ))}
         </form>
-      </section>
+      </Card>
 
-      <section>
-        <h2 className="text-lg font-semibold mb-4">Profile</h2>
+      <Card className="p-5">
+        <h2 className="mb-4 font-medium">Profile</h2>
         <ProfileForm displayName={user.displayName} googleName={googleName} />
-      </section>
+      </Card>
 
-      <section>
-        <h2 className="text-lg font-semibold mb-4">Plan</h2>
-        <div className="border border-line rounded-[var(--radius)] p-4 space-y-2 text-sm">
+      <Card className="p-5">
+        <h2 className="mb-3 font-medium">Plan</h2>
+        <div className="space-y-2 text-sm">
           <p>
             You&apos;re on the <strong>{plan.label}</strong> plan.
           </p>
@@ -69,9 +70,10 @@ export default async function SettingsPage() {
               {plan.intelPerWeek} lookups used in the last 7 days
             </li>
           </ul>
-          <p className="text-muted pt-2">Paid plans aren&apos;t available yet.</p>
+          <p className="pt-2 text-muted">Paid plans aren&apos;t available yet.</p>
         </div>
-      </section>
-    </main>
+      </Card>
+      </div>
+    </Page>
   );
 }

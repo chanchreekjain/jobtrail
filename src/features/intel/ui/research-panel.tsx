@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { researchAction, type ResearchState } from "../actions";
 import { Working } from "@/components/working";
+import { buttonClass, Card } from "@/components/ui";
 
 /** Show "techcrunch.com" rather than a 200-character URL. */
 function hostOf(url: string): string {
@@ -44,12 +45,12 @@ export function ResearchPanel({ initialCompany }: { initialCompany: string }) {
           defaultValue={state.company}
           placeholder="Company name"
           required
-          className="flex-1 border border-line-strong rounded-[var(--radius)] px-3 py-2 bg-transparent"
+          className="h-10 flex-1 rounded-[var(--radius)] border border-line-strong bg-surface px-3 text-sm placeholder:text-faint"
         />
         <button
           type="submit"
           disabled={isPending}
-          className="bg-accent text-accent-text rounded-[var(--radius)] px-4 py-2 disabled:opacity-50"
+          className={buttonClass({ variant: "primary" })}
         >
           {isPending ? "Researching…" : "Research"}
         </button>
@@ -106,7 +107,7 @@ export function ResearchPanel({ initialCompany }: { initialCompany: string }) {
       )}
 
       {result?.status === "ok" && (
-        <section className="space-y-6">
+        <Card className="space-y-6 p-5">
           <div>
             <h2 className="text-xl font-semibold mb-2">
               {result.intel.companyName}
@@ -157,13 +158,13 @@ export function ResearchPanel({ initialCompany }: { initialCompany: string }) {
             )}
           </div>
 
-          <p className="text-xs text-muted">
+          <p className="text-xs text-faint">
             {result.cached
               ? `Already researched on ${new Date(result.intel.fetchedAt).toLocaleDateString()} — didn't use a lookup.`
               : "Freshly researched."}{" "}
             {Math.max(result.remaining, 0)} lookups left this week.
           </p>
-        </section>
+        </Card>
       )}
 
       {result && state.company && (

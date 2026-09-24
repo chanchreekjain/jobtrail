@@ -25,10 +25,10 @@ export default async function LoginPage({
   const target = safeNext(next);
 
   return (
-    <main className="min-h-screen p-12 max-w-sm">
-      <h1 className="text-2xl font-bold mb-2">Sign in</h1>
-      <p className="text-muted mb-6">
-        So your pipeline follows you across devices.
+    <main className="mx-auto w-full max-w-sm px-6 py-20">
+      <h1 className="text-2xl font-semibold">Sign in</h1>
+      <p className="mt-2 mb-8 text-muted">
+        So your applications follow you across devices.
       </p>
 
       <form
@@ -39,7 +39,7 @@ export default async function LoginPage({
       >
         <button
           type="submit"
-          className="border border-line-strong rounded-[var(--radius)] px-4 py-2 w-full hover:bg-surface-2 transition-colors"
+          className="h-10 w-full rounded-[var(--radius)] border border-line-strong text-sm font-medium transition-colors hover:bg-surface-2"
         >
           Continue with Google
         </button>

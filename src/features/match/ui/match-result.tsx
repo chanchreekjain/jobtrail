@@ -1,26 +1,27 @@
 import Link from "next/link";
 import type { MatchOutcome } from "../service";
+import { Card } from "@/components/ui";
 
 /** The score and what's missing, shown right after a JD is extracted. */
 export function MatchResult({ outcome, jobId }: { outcome: MatchOutcome; jobId: string }) {
   if (outcome.status === "no-resume") {
     return (
-      <p className="border border-line rounded-[var(--radius)] p-4 text-sm">
+      <Card className="p-4 text-sm">
         No match score:{" "}
         <Link href="/resume" className="text-accent hover:underline">
           upload your resume
         </Link>{" "}
         and we&apos;ll score this JD against it.
-      </p>
+      </Card>
     );
   }
 
   if (outcome.status === "unavailable") {
     return (
-      <p className="border border-line rounded-[var(--radius)] p-4 text-sm text-muted">
+      <Card className="p-4 text-sm text-muted">
         The AI was too busy to score this one. The JD is saved — score it from
-        your pipeline later.
-      </p>
+        your applications later.
+      </Card>
     );
   }
 
@@ -32,9 +33,9 @@ export function MatchResult({ outcome, jobId }: { outcome: MatchOutcome; jobId: 
   const missing = match.results.filter((r) => !r.met && r.assessable !== false && r.kind === "must");
 
   return (
-    <div className="border border-line rounded-[var(--radius)] p-4 space-y-2">
+    <Card className="space-y-3 p-5">
       <p>
-        <span className="text-2xl font-semibold">
+        <span className="tabular text-3xl font-semibold">
           {match.score === null ? "—" : `${match.score}%`}
         </span>{" "}
         <span className="text-sm text-muted">
@@ -55,6 +56,6 @@ export function MatchResult({ outcome, jobId }: { outcome: MatchOutcome; jobId: 
       <Link href={`/match/${jobId}`} className="text-sm text-accent hover:underline inline-block">
         Full breakdown →
       </Link>
-    </div>
+    </Card>
   );
 }

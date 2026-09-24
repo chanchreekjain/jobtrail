@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { uploadResume, type UploadState } from "../actions";
 import { Working } from "@/components/working";
 
@@ -9,9 +10,21 @@ export function ResumeUpload({ hasResume }: { hasResume: boolean }) {
     uploadResume,
     { message: null, ok: false },
   );
+  const router = useRouter();
+  const formRef = useRef<HTMLFormElement>(null);
+
+  // The action revalidates the page, but this component keeps its own
+  // state — without a refresh the extracted details below would still be
+  // the old resume's, which looks like "Replace" did nothing.
+  useEffect(() => {
+    if (state.ok) {
+      formRef.current?.reset();
+      router.refresh();
+    }
+  }, [state.ok, state.message, router]);
 
   return (
-    <form action={action} className="space-y-3">
+    <form ref={formRef} action={action} className="space-y-3">
       <div className="flex flex-wrap items-center gap-3">
         <input
           type="file"

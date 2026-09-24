@@ -42,7 +42,7 @@ export function ApplicationsTable({
 
   if (rows.length === 0) {
     return (
-      <Empty>Nothing here yet — paste a JD and save it to your pipeline.</Empty>
+      <Empty>Nothing here yet — paste a JD and save it to your applications.</Empty>
     );
   }
 

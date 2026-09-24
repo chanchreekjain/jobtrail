@@ -7,6 +7,7 @@ import { findApplicationByJobId } from "@/features/applications/repo";
 import { SaveToPipeline } from "@/features/applications/ui/save-to-pipeline";
 import { matchJob } from "@/features/match/service";
 import type { RequirementResult } from "@/features/match/types";
+import { Card } from "@/components/ui";
 
 export default async function MatchPage({
   params,
@@ -27,17 +28,17 @@ export default async function MatchPage({
   const outcome = await matchJob(user.id, jobId);
 
   return (
-    <main className="min-h-screen p-12 max-w-3xl space-y-8">
+    <main className="mx-auto w-full max-w-3xl space-y-8 px-6 py-10 sm:px-8 sm:py-14">
       <div>
         <div className="flex gap-4 text-sm">
           <Link href={`/jd?job=${jobId}`} className="text-muted hover:underline">
             ← Back to this JD
           </Link>
-          <Link href="/pipeline" className="text-muted hover:underline">
-            Pipeline
+          <Link href="/applications" className="text-muted hover:underline">
+            Applications
           </Link>
         </div>
-        <h1 className="text-2xl font-bold mt-2">
+        <h1 className="mt-3 text-2xl font-semibold">
           {job.position ?? "Untitled role"}
           {job.company ? ` — ${job.company}` : ""}
         </h1>
@@ -63,8 +64,8 @@ export default async function MatchPage({
 
       {outcome.status === "ok" && (
         <>
-          <div className="border border-line rounded-[var(--radius)] p-4 space-y-1">
-            <p className="text-3xl font-semibold">
+          <Card className="space-y-2 p-5">
+            <p className="tabular text-4xl font-semibold">
               {outcome.match.score === null ? "—" : `${outcome.match.score}%`}
             </p>
             <p className="text-sm text-muted">
@@ -85,12 +86,12 @@ export default async function MatchPage({
                 may be higher. Reload this page later to redo it properly.
               </p>
             )}
-            <p className="text-xs text-muted pt-2">
+            <p className="pt-2 text-xs text-muted">
               Must-haves count double. A requirement only counts as met when
               your resume shows it — worth checking the misses, in case your
               resume undersells you.
             </p>
-          </div>
+          </Card>
 
           {!inPipeline && (
             <SaveToPipeline jobId={jobId} company={job.company} position={job.position} />
@@ -113,10 +114,10 @@ function Checklist({ title, items }: { title: string; items: RequirementResult[]
 
   return (
     <section>
-      <h2 className="font-semibold mb-2">{title}</h2>
-      <ul className="space-y-2">
+      <h2 className="mb-3 text-xs uppercase tracking-wide text-muted">{title}</h2>
+      <ul className="space-y-2.5">
         {sorted.map((r, i) => (
-          <li key={i} className="flex gap-3 text-sm">
+          <li key={i} className="flex gap-3 text-sm leading-relaxed">
             {r.assessable === false ? (
               <span aria-label="Not scored" className="text-faint">–</span>
             ) : (

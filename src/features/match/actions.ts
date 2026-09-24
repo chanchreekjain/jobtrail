@@ -7,6 +7,6 @@ import { matchJob, type MatchOutcome } from "./service";
 export async function scoreJob(jobId: string, force = false): Promise<MatchOutcome> {
   const user = await requireUser();
   const outcome = await matchJob(user.id, jobId, force);
-  revalidatePath("/pipeline");
+  revalidatePath("/applications");
   return outcome;
 }

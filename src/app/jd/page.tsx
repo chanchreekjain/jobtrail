@@ -2,6 +2,7 @@ import { JdForm } from "@/features/jobs/ui/jd-form";
 import { requireUser } from "@/lib/auth/current-user";
 import { findJobById } from "@/features/jobs/repo";
 import { matchJob } from "@/features/match/service";
+import { Page } from "@/components/ui";
 
 export default async function JdPage({
   searchParams,
@@ -19,9 +20,15 @@ export default async function JdPage({
   const match = job ? await matchJob(user.id, job.id) : null;
 
   return (
-    <main className="min-h-screen p-12 max-w-2xl">
-      <h1 className="text-2xl font-bold mb-6">Paste a JD</h1>
+    <Page
+      title={job ? "This JD" : "Paste a JD"}
+      description={
+        job
+          ? "Edit the text and extract again to replace it."
+          : "Paste the whole posting. We pull out the requirements and score them against your resume."
+      }
+    >
       <JdForm initialJob={job} initialMatch={match} initialText={job?.rawJd ?? ""} />
-    </main>
+    </Page>
   );
 }

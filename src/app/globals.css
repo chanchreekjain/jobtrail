@@ -12,66 +12,67 @@
 :root {
   color-scheme: light;
 
-  --bg: #fbfbfa;          /* page */
-  --surface: #ffffff;     /* cards, menus, table backgrounds */
-  --surface-2: #f4f4f2;   /* hover, subtle fills */
-  --line: #e3e3df;        /* borders, rules */
-  --line-strong: #cfcfc9; /* inputs, focus outlines */
-  --text: #1a1a18;        /* body */
-  --muted: #6f6f68;       /* labels, secondary */
-  --faint: #9b9b93;       /* placeholders, disabled */
+  /* Palette taken from the logo: deep navy, teal, soft lime, pale blue. */
+  --bg: #f4f7f7;
+  --surface: #ffffff;
+  --surface-2: #e9f0f0;
+  --line: #d6e2e2;
+  --line-strong: #b6c9c9;
+  --text: #10333f;          /* navy from the wordmark */
+  --muted: #56707a;
+  --faint: #8aa0a7;
 
-  --accent: #2f5bd8;      /* one accent, used for actions and links */
+  --accent: #14776a;        /* teal, darkened so white text passes contrast */
   --accent-text: #ffffff;
-  --accent-soft: #e8edfb;
+  --accent-soft: #dbeeea;
 
-  --positive: #1f7a4d;
+  --positive: #4f8c2f;      /* the logo's lime, darkened for text */
   --negative: #b4392f;
   --warning: #8a6116;
 
-  --radius: 6px;
+  --radius: 8px;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    color-scheme: dark;
+  color-scheme: dark;
 
-    --bg: #111110;
-    --surface: #1a1a19;
-    --surface-2: #232321;
-    --line: #2e2e2b;
-    --line-strong: #3f3f3b;
-    --text: #ececea;
-    --muted: #a3a39c;
-    --faint: #76766f;
+  --bg: #0b1c22;
+  --surface: #11282f;
+  --surface-2: #17343c;
+  --line: #1f424b;
+  --line-strong: #2d5b66;
+  --text: #e6f0f0;
+  --muted: #9db3b9;
+  --faint: #6d868e;
 
-    --accent: #7c9cf5;
-    --accent-text: #10131c;
-    --accent-soft: #1c2438;
+  --accent: #3fbfa6;        /* the logo's teal, bright enough on dark */
+  --accent-text: #06231f;
+  --accent-soft: #123a38;
 
-    --positive: #5cc08a;
-    --negative: #e8796d;
-    --warning: #d9a640;
+  --positive: #a8cf6a;      /* the logo's lime */
+  --negative: #e8796d;
+  --warning: #d9a640;
   }
 }
 
 :root[data-theme="dark"] {
   color-scheme: dark;
 
-  --bg: #111110;
-  --surface: #1a1a19;
-  --surface-2: #232321;
-  --line: #2e2e2b;
-  --line-strong: #3f3f3b;
-  --text: #ececea;
-  --muted: #a3a39c;
-  --faint: #76766f;
+  --bg: #0b1c22;
+  --surface: #11282f;
+  --surface-2: #17343c;
+  --line: #1f424b;
+  --line-strong: #2d5b66;
+  --text: #e6f0f0;
+  --muted: #9db3b9;
+  --faint: #6d868e;
 
-  --accent: #7c9cf5;
-  --accent-text: #10131c;
-  --accent-soft: #1c2438;
+  --accent: #3fbfa6;        /* the logo's teal, bright enough on dark */
+  --accent-text: #06231f;
+  --accent-soft: #123a38;
 
-  --positive: #5cc08a;
+  --positive: #a8cf6a;      /* the logo's lime */
   --negative: #e8796d;
   --warning: #d9a640;
 }

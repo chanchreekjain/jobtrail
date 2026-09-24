@@ -14,7 +14,22 @@ export async function Nav() {
   return (
     <header className="sticky top-0 z-20 border-b border-line bg-bg/85 backdrop-blur">
       <div className="mx-auto flex h-14 w-full max-w-5xl items-center gap-6 px-6 sm:px-8">
-        <Link href="/" className="font-semibold tracking-tight">
+        <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight">
+          {/* Inherits the theme's ink and accent, so the mark works in
+              light and dark without two files. */}
+          <span
+            className="h-6 w-6 [--logo-accent:var(--accent)] [--logo-ink:var(--text)]"
+            style={{
+              maskImage: "url(/logo.svg)",
+              WebkitMaskImage: "url(/logo.svg)",
+              maskSize: "contain",
+              WebkitMaskSize: "contain",
+              maskRepeat: "no-repeat",
+              WebkitMaskRepeat: "no-repeat",
+              backgroundColor: "currentColor",
+            }}
+            aria-hidden="true"
+          />
           jobtrail
         </Link>
 

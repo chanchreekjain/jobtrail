@@ -15,7 +15,7 @@ export default async function Home() {
       actions={
         <>
           <ButtonLink href="/jd" variant="primary">Paste a JD</ButtonLink>
-          <ButtonLink href="/pipeline">View pipeline</ButtonLink>
+          <ButtonLink href="/applications">View applications</ButtonLink>
         </>
       }
     >
@@ -35,7 +35,7 @@ export default async function Home() {
 
       <div className="grid gap-4 sm:grid-cols-3">
         <Stat label="JDs analysed" value={counts.jobs} />
-        <Stat label="In pipeline" value={counts.applications} />
+        <Stat label="Saved" value={counts.applications} />
         <Stat label="Applied" value={counts.applied} />
       </div>
     </Page>

@@ -4,7 +4,7 @@ import type { JobDetails } from "./details";
 
 /**
  * The same column list for every query that reads job details, so the
- * jobs page, the pipeline and the CSV can't drift apart. sql.unsafe()
+ * jobs page, the applications table and the CSV can't drift apart.
  * is safe here only because this string is fixed in code — it must
  * never contain anything a user typed.
  */

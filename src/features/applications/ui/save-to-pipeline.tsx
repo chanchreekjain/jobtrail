@@ -57,7 +57,7 @@ export function SaveToPipeline({
           disabled={isSaving}
           className="border border-line-strong rounded-[var(--radius)] px-4 py-2 w-fit disabled:opacity-50"
         >
-          {isSaving ? "Saving…" : "Save to pipeline"}
+          {isSaving ? "Saving…" : "Save to applications"}
         </button>
         {state.message && (
           <span className={`text-sm ${state.ok ? "text-muted" : "text-negative"}`}>

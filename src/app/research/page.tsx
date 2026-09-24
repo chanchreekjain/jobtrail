@@ -1,5 +1,6 @@
 import { requireUser } from "@/lib/auth/current-user";
 import { ResearchPanel } from "@/features/intel/ui/research-panel";
+import { Page } from "@/components/ui";
 
 export default async function ResearchPage({
   searchParams,
@@ -10,9 +11,12 @@ export default async function ResearchPage({
   const { company } = await searchParams;
 
   return (
-    <main className="min-h-screen p-12 max-w-2xl">
-      <h1 className="text-2xl font-bold mb-6">Research a company</h1>
+    <Page
+      title="Research a company"
+      description="What they do, recent news, and a way in — every claim linked to its source."
+      width="narrow"
+    >
       <ResearchPanel initialCompany={company?.trim() ?? ""} />
-    </main>
+    </Page>
   );
 }

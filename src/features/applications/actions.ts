@@ -15,7 +15,7 @@ import {
 
 function refresh() {
   revalidatePath("/");
-  revalidatePath("/pipeline");
+  revalidatePath("/applications");
 }
 
 export async function addApplication(formData: FormData) {
@@ -60,7 +60,7 @@ export async function saveToPipeline(
 
   const existing = await findApplicationByJobId(user.id, jobId);
   if (existing) {
-    return { message: "Already in your pipeline.", ok: false };
+    return { message: "Already saved.", ok: false };
   }
 
   try {
@@ -73,7 +73,7 @@ export async function saveToPipeline(
   }
 
   refresh();
-  return { message: "Saved to pipeline.", ok: true };
+  return { message: "Saved.", ok: true };
 }
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
