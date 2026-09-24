@@ -125,9 +125,15 @@ export function ApplicationsTable({
                     <MatchCell row={row} hasResume={hasResume} />
                   </td>
                   <td className="max-w-64 min-w-40 px-3 py-2.5">
-                    {detailsSummary(row) ?? <span className="text-faint">—</span>}
+                    <EditableCell
+                      value={row.detailsNote}
+                      placeholder={detailsSummary(row) ?? "Add details"}
+                      save={(v) => updateDetails(row.id, v)}
+                    />
                     {row.notes && (
-                      <span className="text-muted mt-1 block text-xs">{row.notes}</span>
+                      <span className="text-muted mt-1 block px-2 text-xs">
+                        {row.notes}
+                      </span>
                     )}
                   </td>
                   <td className="px-3 py-2.5">
