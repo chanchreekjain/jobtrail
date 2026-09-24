@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { cookies } from "next/headers";
 import { Nav } from "@/components/nav";
+import { Footer } from "@/components/footer";
 import { THEME_COOKIE, parseTheme } from "@/features/account/theme";
 
 const geistSans = Geist({
@@ -33,6 +34,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       <body className="bg-bg text-text flex min-h-full flex-col">
         <Nav />
         {children}
+        <Footer />
       </body>
     </html>
   );

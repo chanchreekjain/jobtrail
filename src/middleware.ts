@@ -9,7 +9,7 @@ import { auth } from "@/auth";
  * is a deliberate act, written down in this list, rather than something
  * you get by forgetting a line at the top of a file.
  */
-const PUBLIC_PATHS = ["/login"];
+const PUBLIC_PATHS = ["/login", "/privacy"];
 
 export default auth((req) => {
   if (req.auth) return NextResponse.next();

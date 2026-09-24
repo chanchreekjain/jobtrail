@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { signIn } from "@/auth";
 
 /**
@@ -44,6 +45,14 @@ export default async function LoginPage({
           Continue with Google
         </button>
       </form>
+
+      <p className="text-muted mt-6 text-xs">
+        We read your resume to score jobs against it, and never store the file.{" "}
+        <Link href="/privacy" className="text-accent hover:underline">
+          What we keep
+        </Link>
+        .
+      </p>
     </main>
   );
 }
