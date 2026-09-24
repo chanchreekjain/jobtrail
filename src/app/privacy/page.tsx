@@ -12,10 +12,17 @@ export default function PrivacyPage() {
     <Page
       title="Privacy"
       description="What jobtrail keeps, and what it doesn't."
-      width="narrow"
+      sections={[
+        { id: "stored", label: "What we store" },
+        { id: "third-parties", label: "Who else sees it" },
+        { id: "shared", label: "Shared between users" },
+        { id: "deleting", label: "Deleting it" },
+        { id: "byok", label: "Your own API key" },
+        { id: "cookies", label: "Cookies" },
+      ]}
     >
-      <div className="space-y-8 text-sm leading-relaxed">
-        <section>
+      <div className="max-w-2xl space-y-8 text-sm leading-relaxed">
+        <section id="stored" className="scroll-mt-24">
           <h2 className="mb-2 text-base font-medium">What we store</h2>
           <ul className="text-muted list-disc space-y-1.5 pl-5">
             <li>
@@ -46,7 +53,7 @@ export default function PrivacyPage() {
           </ul>
         </section>
 
-        <section>
+        <section id="third-parties" className="scroll-mt-24">
           <h2 className="mb-2 text-base font-medium">Who else sees it</h2>
           <ul className="text-muted list-disc space-y-1.5 pl-5">
             <li>
@@ -67,7 +74,7 @@ export default function PrivacyPage() {
           </ul>
         </section>
 
-        <section>
+        <section id="shared" className="scroll-mt-24">
           <h2 className="mb-2 text-base font-medium">Shared between users</h2>
           <p className="text-muted">
             Company research is cached by company and reused by everyone, so one
@@ -77,7 +84,7 @@ export default function PrivacyPage() {
           </p>
         </section>
 
-        <section>
+        <section id="deleting" className="scroll-mt-24">
           <h2 className="mb-2 text-base font-medium">Deleting it</h2>
           <p className="text-muted">
             You can delete any application, any saved job description, and your resume
@@ -90,7 +97,7 @@ export default function PrivacyPage() {
           </p>
         </section>
 
-        <section>
+        <section id="byok" className="scroll-mt-24">
           <h2 className="mb-2 text-base font-medium">If you add your own API key</h2>
           <p className="text-muted">
             It&apos;s encrypted before being stored, and used only for requests you
@@ -100,7 +107,7 @@ export default function PrivacyPage() {
           </p>
         </section>
 
-        <section>
+        <section id="cookies" className="scroll-mt-24">
           <h2 className="mb-2 text-base font-medium">Cookies</h2>
           <p className="text-muted">
             Two: one that keeps you signed in, and one that remembers whether you chose

@@ -1,11 +1,16 @@
 import Link from "next/link";
-import { requireUser } from "@/lib/auth/current-user";
+import { currentUser } from "@/lib/auth/current-user";
+import { Landing } from "@/features/marketing/landing";
 import { findCurrentResume } from "@/features/resume/repo";
 import { getCounts, listApplications } from "@/features/applications/repo";
 import { Card, Page, ButtonLink, Tag } from "@/components/ui";
 
 export default async function Home() {
-  const user = await requireUser();
+  // "/" is public: signed-out visitors get the landing page, everyone
+  // else goes straight to their dashboard.
+  const user = await currentUser();
+  if (!user) return <Landing />;
+
   const [counts, applications, resume] = await Promise.all([
     getCounts(user.id),
     listApplications(user.id),

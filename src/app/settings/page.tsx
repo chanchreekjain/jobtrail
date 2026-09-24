@@ -31,9 +31,18 @@ export default async function SettingsPage() {
   const googleName = (await auth())?.user?.name ?? null;
 
   return (
-    <Page title="Settings" width="narrow">
-      <div className="space-y-8">
-        <Card className="p-5">
+    <Page
+      title="Settings"
+      sections={[
+        { id: "appearance", label: "Appearance" },
+        { id: "profile", label: "Profile" },
+        { id: "plan", label: "Plan" },
+        { id: "api-key", label: "Your own key" },
+        { id: "delete", label: "Delete account" },
+      ]}
+    >
+      <div className="max-w-2xl space-y-8">
+        <Card id="appearance" className="scroll-mt-24 p-5">
           <h2 className="font-medium">Appearance</h2>
           <p className="text-muted mt-1 mb-4 text-sm">Saved on this device.</p>
 
@@ -65,12 +74,12 @@ export default async function SettingsPage() {
           </form>
         </Card>
 
-        <Card className="p-5">
+        <Card id="profile" className="scroll-mt-24 p-5">
           <h2 className="mb-4 font-medium">Profile</h2>
           <ProfileForm displayName={user.displayName} googleName={googleName} />
         </Card>
 
-        <Card className="p-5">
+        <Card id="plan" className="scroll-mt-24 p-5">
           <h2 className="mb-3 font-medium">Plan</h2>
           <div className="space-y-2 text-sm">
             <p>
@@ -87,7 +96,7 @@ export default async function SettingsPage() {
           </div>
         </Card>
 
-        <Card className="p-5">
+        <Card id="api-key" className="scroll-mt-24 p-5">
           <h2 className="font-medium">Your own Gemini key</h2>
           <p className="text-muted mt-1 mb-4 text-sm">
             Optional. With your own key, requests run on your Google quota instead of
@@ -127,7 +136,7 @@ export default async function SettingsPage() {
           </p>
         </Card>
 
-        <Card className="border-negative/40 p-5">
+        <Card id="delete" className="border-negative/40 scroll-mt-24 p-5">
           <h2 className="font-medium">Delete account</h2>
           <p className="text-muted mt-1 mb-4 text-sm">
             Removes your account and everything in it — saved JDs, applications, scores

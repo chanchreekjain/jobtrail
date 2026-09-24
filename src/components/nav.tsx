@@ -41,9 +41,33 @@ export async function Nav() {
               image={user.image ?? null}
             />
           ) : (
-            <Link href="/login" className="text-muted hover:text-text">
-              Sign in
-            </Link>
+            <>
+              {/* Signed out, the nav belongs to the landing page. */}
+              <Link
+                href="/#how"
+                className="text-muted hover:text-text hidden sm:inline"
+              >
+                How it works
+              </Link>
+              <Link
+                href="/#features"
+                className="text-muted hover:text-text hidden sm:inline"
+              >
+                Features
+              </Link>
+              <Link
+                href="/privacy"
+                className="text-muted hover:text-text hidden sm:inline"
+              >
+                Privacy
+              </Link>
+              <Link
+                href="/login"
+                className="bg-accent text-accent-text inline-flex h-8 items-center rounded-[var(--radius)] px-3 font-medium"
+              >
+                Sign in
+              </Link>
+            </>
           )}
         </div>
       </div>

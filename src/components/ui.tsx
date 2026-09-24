@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { ComponentProps, ReactNode } from "react";
+import { SectionNav, type Section } from "./section-nav";
 
 /**
  * The small set of pieces every page is built from. Having them in one
@@ -65,12 +66,15 @@ export function Page({
   actions,
   children,
   width = "wide",
+  sections,
 }: {
   title: string;
   description?: string;
   actions?: ReactNode;
   children: ReactNode;
   width?: "narrow" | "wide";
+  /** Long pages get jump links beside them on wide screens. */
+  sections?: Section[];
 }) {
   return (
     <main
@@ -85,7 +89,17 @@ export function Page({
         </div>
         {actions && <div className="flex flex-wrap gap-2">{actions}</div>}
       </header>
-      {children}
+
+      {sections ? (
+        <div className="lg:grid lg:grid-cols-[1fr_11rem] lg:gap-10">
+          <div className="min-w-0">{children}</div>
+          <aside className="sticky top-20 order-last hidden self-start lg:block">
+            <SectionNav sections={sections} />
+          </aside>
+        </div>
+      ) : (
+        children
+      )}
     </main>
   );
 }
