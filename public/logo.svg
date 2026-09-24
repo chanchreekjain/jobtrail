@@ -1,10 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" role="img" aria-label="jobtrail">
-  <!-- Flat two-tone version of the mark: a J whose hook doubles as the
-       bottom of a tick. No isometric faces, so it stays readable small. -->
-  <path d="M38 10 V34 a14 14 0 0 1-24 10"
-        stroke="var(--logo-ink, #10333f)" stroke-width="11"
-        stroke-linecap="round" stroke-linejoin="round" />
-  <path d="M26 44 L54 16"
-        stroke="var(--logo-accent, #2fb49a)" stroke-width="11"
-        stroke-linecap="round" />
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1"></svg>
