@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import { researchAction, type ResearchState } from "../actions";
 import { Working } from "@/components/working";
 import { buttonClass, Card } from "@/components/ui";
+import { formatDay } from "@/lib/dates";
 
 /** Show "techcrunch.com" rather than a 200-character URL. */
 function hostOf(url: string): string {
@@ -155,7 +156,7 @@ export function ResearchPanel({ initialCompany }: { initialCompany: string }) {
 
           <p className="text-faint text-xs">
             {result.cached
-              ? `Already researched on ${new Date(result.intel.fetchedAt).toLocaleDateString()} — didn't use a lookup.`
+              ? `Already researched on ${formatDay(result.intel.fetchedAt)} — didn't use a lookup.`
               : "Freshly researched."}{" "}
             {Math.max(result.remaining, 0)} lookups left this week.
           </p>

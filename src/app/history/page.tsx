@@ -3,6 +3,7 @@ import { listJobHistory } from "@/features/jobs/repo";
 import { currentPlan } from "@/lib/plans";
 import { requireUser } from "@/lib/auth/current-user";
 import { Card, Empty, Page } from "@/components/ui";
+import { formatDay } from "@/lib/dates";
 import { DeleteButton } from "@/components/delete-button";
 import { removeJob } from "@/features/jobs/actions";
 
@@ -34,8 +35,7 @@ export default async function HistoryPage() {
                   </p>
                   <p className="text-muted mt-1 text-sm">{job.preview}…</p>
                   <p className="text-faint tabular mt-2 text-xs">
-                    {new Date(job.created_at).toLocaleDateString()} ·{" "}
-                    {job.requirement_count} requirements
+                    {formatDay(job.created_at)} · {job.requirement_count} requirements
                   </p>
                 </Link>
                 <div className="border-line mt-3 border-t pt-3">

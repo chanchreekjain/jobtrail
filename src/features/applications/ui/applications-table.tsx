@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import {
   toggleApplied,
   changeAppliedDate,
@@ -40,7 +40,12 @@ export function ApplicationsTable({
   hasResume: boolean;
 }) {
   const [isPending, startTransition] = useTransition();
-  const today = todayLocal();
+
+  // "Today" is a different date on the server (UTC) than in the browser,
+  // so working it out during render makes the two disagree. Filling it in
+  // after mount keeps the first render identical on both sides.
+  const [today, setToday] = useState("");
+  useEffect(() => setToday(todayLocal()), []);
 
   if (rows.length === 0) {
     return (
@@ -135,8 +140,9 @@ export function ApplicationsTable({
                   {applied ? (
                     <input
                       type="date"
-                      max={today}
-                      defaultValue={row.applied_at ?? today}
+                      max={today || undefined}
+                      defaultValue={row.applied_at ?? ""}
+                      key={row.applied_at ?? today}
                       disabled={isPending}
                       onClick={(e) => openPicker(e.currentTarget)}
                       onChange={(e) =>

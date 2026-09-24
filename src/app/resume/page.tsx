@@ -2,6 +2,7 @@ import { requireUser } from "@/lib/auth/current-user";
 import { findCurrentResume } from "@/features/resume/repo";
 import { ResumeUpload } from "@/features/resume/ui/resume-upload";
 import { Card, Empty, Page, Tag } from "@/components/ui";
+import { formatDay } from "@/lib/dates";
 import { DeleteButton } from "@/components/delete-button";
 import { removeResume } from "@/features/resume/actions";
 
@@ -27,8 +28,8 @@ export default async function ResumePage() {
         <div className="mt-8 space-y-6">
           <p className="text-muted text-sm">
             From <span className="text-text">{resume.fileName}</span>, uploaded{" "}
-            {new Date(resume.createdAt).toLocaleDateString()}. Check it — if
-            something&apos;s wrong here, the match scores will be wrong too.
+            {formatDay(resume.createdAt)}. Check it — if something&apos;s wrong here,
+            the match scores will be wrong too.
           </p>
 
           <Card className="p-5">
