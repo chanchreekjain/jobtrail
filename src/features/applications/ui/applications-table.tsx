@@ -63,7 +63,7 @@ export function ApplicationsTable({
 
   return (
     <Card className="overflow-x-auto">
-      <table className="w-full min-w-3xl border-collapse text-sm">
+      <table className="w-max min-w-full border-collapse text-sm">
         <thead>
           <tr className="border-line text-muted border-b text-left text-xs tracking-wide uppercase">
             <th className="px-3 py-2.5 font-medium">Company</th>
@@ -101,7 +101,7 @@ export function ApplicationsTable({
                 <td className="px-3 py-2.5 whitespace-nowrap">
                   <MatchCell row={row} hasResume={hasResume} />
                 </td>
-                <td className="min-w-48 px-3 py-2.5">
+                <td className="max-w-64 min-w-40 px-3 py-2.5">
                   {detailsSummary(row) ?? <span className="text-faint">—</span>}
                   {row.notes && (
                     <span className="text-muted mt-1 block text-xs">{row.notes}</span>

@@ -4,17 +4,28 @@ import { useEffect, useRef, useState } from "react";
 import type { Section } from "./section-nav";
 
 /**
- * In-page contents on small screens: a labelled button at the top of the
- * page, just under the heading, that drops down the list of sections.
+ * In-page contents on small screens.
  *
- * Placed inline rather than floating — the government and docs-site
- * convention is an in-page table of contents directly below the H1, and
- * it sits in the easy-to-reach middle band of a phone screen rather than
- * a corner.
+ * Two triggers, one list:
+ *  - inline under the page title, where a table of contents belongs
+ *  - a floating pill that appears once you've scrolled past it, so you
+ *    never have to scroll back up to jump somewhere else
+ *
+ * The pill is `fixed`, not `sticky`: sticky depends on the parent's box
+ * and behaves differently on mobile browsers, which is what broke the
+ * earlier version on a real phone.
  */
 export function SectionMenu({ sections }: { sections: Section[] }) {
   const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 280);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   useEffect(() => {
     if (!open) return;
@@ -32,61 +43,102 @@ export function SectionMenu({ sections }: { sections: Section[] }) {
     };
   }, [open]);
 
-  return (
-    <div ref={ref} className="relative mb-6 lg:hidden">
-      <button
-        type="button"
-        onClick={() => setOpen((o) => !o)}
-        aria-haspopup="true"
-        aria-expanded={open}
-        className="border-line bg-surface flex w-full items-center justify-between rounded-[var(--radius)] border px-4 py-3 text-sm"
-      >
-        <span className="flex items-center gap-2">
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            aria-hidden="true"
+  const list = (
+    <ul className="border-line bg-surface divide-line divide-y overflow-hidden rounded-[var(--radius)] border shadow-lg">
+      {sections.map((s) => (
+        <li key={s.id}>
+          <a
+            href={`#${s.id}`}
+            onClick={() => setOpen(false)}
+            className="block px-4 py-3 text-sm"
           >
-            <path d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
-          On this page
-        </span>
-        <svg
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          aria-hidden="true"
-          className={`transition-transform ${open ? "rotate-180" : ""}`}
-        >
-          <path d="m6 9 6 6 6-6" />
-        </svg>
-      </button>
+            {s.label}
+          </a>
+        </li>
+      ))}
+    </ul>
+  );
 
-      {open && (
-        <ul className="border-line bg-surface divide-line absolute inset-x-0 top-full z-30 mt-1 divide-y rounded-[var(--radius)] border shadow-lg">
-          {sections.map((s) => (
-            <li key={s.id}>
-              <a
-                href={`#${s.id}`}
-                onClick={() => setOpen(false)}
-                className="block px-4 py-3 text-sm"
-              >
-                {s.label}
-              </a>
-            </li>
-          ))}
-        </ul>
+  return (
+    <div ref={ref} className="lg:hidden">
+      {/* Inline: the table of contents in its conventional place. */}
+      <div className="relative mb-6">
+        <button
+          type="button"
+          onClick={() => setOpen((o) => !o)}
+          aria-haspopup="true"
+          aria-expanded={open && !scrolled}
+          className="border-line bg-surface flex w-full items-center justify-between rounded-[var(--radius)] border px-4 py-3 text-sm"
+        >
+          <span className="flex items-center gap-2">
+            <MenuIcon />
+            On this page
+          </span>
+          <ChevronIcon open={open} />
+        </button>
+
+        {open && !scrolled && (
+          <div className="absolute inset-x-0 top-full z-30 mt-1">{list}</div>
+        )}
+      </div>
+
+      {/* Floating: same list, reachable from anywhere down the page. */}
+      {scrolled && (
+        <>
+          <button
+            type="button"
+            onClick={() => setOpen((o) => !o)}
+            aria-haspopup="true"
+            aria-expanded={open}
+            className="border-line bg-surface fixed bottom-20 left-1/2 z-40 flex -translate-x-1/2 items-center gap-2 rounded-full border px-4 py-2.5 text-sm shadow-lg"
+          >
+            <MenuIcon />
+            On this page
+          </button>
+
+          {open && (
+            <div className="fixed inset-x-4 bottom-32 z-40 max-h-[60vh] overflow-y-auto">
+              {list}
+            </div>
+          )}
+        </>
       )}
     </div>
+  );
+}
+
+function MenuIcon() {
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      aria-hidden="true"
+    >
+      <path d="M4 6h16M4 12h16M4 18h16" />
+    </svg>
+  );
+}
+
+function ChevronIcon({ open }: { open: boolean }) {
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      className={`transition-transform ${open ? "rotate-180" : ""}`}
+    >
+      <path d="m6 9 6 6 6-6" />
+    </svg>
   );
 }
