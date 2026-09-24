@@ -90,16 +90,19 @@ export function Page({
         {actions && <div className="flex flex-wrap gap-2">{actions}</div>}
       </header>
 
+      {sections && (
+        // Sits directly under the sticky header, as a sibling of the
+        // content rather than inside it: a sticky element only sticks
+        // within its own parent's box, so nesting it beside the sections
+        // made it scroll away with them.
+        <div className="border-line bg-bg/95 sticky top-[3.25rem] z-10 -mx-6 mb-4 border-y px-6 backdrop-blur sm:top-14 sm:-mx-8 sm:px-8 lg:hidden">
+          <SectionNav sections={sections} horizontal />
+        </div>
+      )}
+
       {sections ? (
         <div className="lg:grid lg:grid-cols-[1fr_11rem] lg:gap-10">
-          <div className="min-w-0">
-            {/* Phones get the same links as a sticky row of chips under
-                the header, since there's no room for a column. */}
-            <div className="border-line bg-bg/90 sticky top-[3.25rem] z-10 mb-4 border-b backdrop-blur sm:top-14 lg:hidden">
-              <SectionNav sections={sections} horizontal />
-            </div>
-            {children}
-          </div>
+          <div className="min-w-0">{children}</div>
           <aside className="sticky top-20 order-last hidden self-start lg:block">
             <SectionNav sections={sections} />
           </aside>
