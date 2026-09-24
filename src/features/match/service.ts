@@ -11,7 +11,12 @@ export type MatchOutcome =
   | { status: "unavailable" }
   | { status: "error"; message: string };
 
-export async function matchJob(userId: string, jobId: string): Promise<MatchOutcome> {
+export async function matchJob(
+  userId: string,
+  jobId: string,
+  /** Ignore the cached score and ask the AI again. */
+  force = false,
+): Promise<MatchOutcome> {
   const resume = await findCurrentResume(userId);
   if (!resume) return { status: "no-resume" };
 
@@ -20,7 +25,7 @@ export async function matchJob(userId: string, jobId: string): Promise<MatchOutc
 
   const cached = await findMatch(jobId, resume.id);
   // A full AI match is final. A basic one is only a stand-in: try again.
-  if (cached && cached.method === "ai") return { status: "ok", match: cached };
+  if (!force && cached && cached.method === "ai") return { status: "ok", match: cached };
 
   if (job.requirements.length === 0) {
     const match: Match = { ...summarise([]), results: [], method: "ai" };
