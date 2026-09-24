@@ -44,6 +44,13 @@ export default async function MatchPage({
         </p>
       )}
 
+      {outcome.status === "unavailable" && (
+        <p className="text-gray-500">
+          The AI is busy right now, so this one isn&apos;t scored yet. Reload in
+          a minute.
+        </p>
+      )}
+
       {outcome.status === "error" && <p className="text-red-600">{outcome.message}</p>}
 
       {outcome.status === "ok" && (

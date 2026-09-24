@@ -20,6 +20,27 @@ export function MatchCell({ row, hasResume }: { row: Application; hasResume: boo
     );
   }
 
+  if (row.match_scored && row.match_method === "basic") {
+    return (
+      <button
+        type="button"
+        disabled={isPending}
+        onClick={() =>
+          startTransition(async () => {
+            setError(null);
+            const outcome = await scoreJob(row.job_id!);
+            if (outcome.status === "unavailable") setError("AI still busy.");
+            else if (outcome.status === "error") setError(outcome.message);
+          })
+        }
+        className="border border-gray-400 rounded px-3 py-1 text-xs hover:bg-gray-500/10 disabled:opacity-50"
+        title="This score came from exact name matching while the AI was down"
+      >
+        {isPending ? "Scoring…" : "Re-score"}
+      </button>
+    );
+  }
+
   if (row.match_scored) {
     return (
       <Link href={`/match/${row.job_id}`} className="hover:underline" title="See the breakdown">
@@ -47,7 +68,11 @@ export function MatchCell({ row, hasResume }: { row: Application; hasResume: boo
           startTransition(async () => {
             setError(null);
             const outcome = await scoreJob(row.job_id!);
-            if (outcome.status === "error") setError(outcome.message);
+            if (outcome.status === "unavailable") {
+              setError("AI busy — try again in a minute.");
+            } else if (outcome.status === "error") {
+              setError(outcome.message);
+            }
           })
         }
         className="border border-gray-400 rounded px-3 py-1 text-xs hover:bg-gray-500/10 disabled:opacity-50"

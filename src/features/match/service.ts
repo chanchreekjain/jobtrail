@@ -7,6 +7,8 @@ import type { Match, RequirementResult } from "./types";
 export type MatchOutcome =
   | { status: "ok"; match: Match }
   | { status: "no-resume" }
+  /** The AI was busy. No score is better than a misleading one. */
+  | { status: "unavailable" }
   | { status: "error"; message: string };
 
 export async function matchJob(userId: string, jobId: string): Promise<MatchOutcome> {
@@ -39,14 +41,11 @@ export async function matchJob(userId: string, jobId: string): Promise<MatchOutc
     if (status !== 503 && status !== 429) {
       return { status: "error", message: "Couldn't score this one. Try again." };
     }
+    // An old score is still worth showing; otherwise say nothing. Exact
+    // name matching alone scored a real JD at 5%, which reads as a verdict
+    // when it's really just the AI being down.
     if (cached) return { status: "ok", match: cached };
-
-    // Gemini is overloaded: score what plain comparison can, rather than
-    // nothing. Marked "basic" so the UI says so and it's redone later.
-    const results = basicMatch(job.requirements, resume.skills);
-    const match: Match = { ...summarise(results), results, method: "basic" };
-    await saveMatch(userId, jobId, resume.id, match);
-    return { status: "ok", match };
+    return { status: "unavailable" };
   }
 
   // The same text the model read — its quotes have to be found in here.
@@ -81,32 +80,4 @@ export async function matchJob(userId: string, jobId: string): Promise<MatchOutc
   const match: Match = { ...summarise(results), results, method: "ai" };
   await saveMatch(userId, jobId, resume.id, match);
   return { status: "ok", match };
-}
-
-/** "Node.js", "node js" and "nodejs" all become "nodejs". */
-function normalise(skill: string): string {
-  return skill.toLowerCase().replace(/[^\p{L}\p{N}+#]/gu, "");
-}
-
-/**
- * No AI: a requirement is met only when its skill name matches a resume
- * skill exactly, after normalising. It misses synonyms ("postgres" vs
- * "postgresql"), so it can only under-count — never claim a skill the
- * resume doesn't list.
- */
-function basicMatch(
-  requirements: { text: string; skill: string; kind: "must" | "nice" }[],
-  resumeSkills: string[],
-): RequirementResult[] {
-  const have = new Map(resumeSkills.map((s) => [normalise(s), s]));
-  return requirements.map((r) => {
-    const hit = have.get(normalise(r.skill));
-    return {
-      text: r.text,
-      skill: r.skill,
-      kind: r.kind,
-      met: hit !== undefined,
-      evidence: hit ?? null,
-    };
-  });
 }

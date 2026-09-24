@@ -7,9 +7,10 @@ import {
   type PipelineState,
 } from "@/features/applications/actions";
 import { JobTable } from "./job-table";
+import { MatchResult } from "@/features/match/ui/match-result";
 import { Working } from "@/components/working";
 
-const initialState: JdState = { job: null, error: null, cached: false };
+const initialState: JdState = { job: null, error: null, cached: false, match: null };
 const initialPipelineState: PipelineState = { message: null, ok: false };
 
 export function JdForm() {
@@ -38,7 +39,9 @@ export function JdForm() {
         </button>
       </form>
 
-      {isPending && <Working label="Reading the JD and pulling out requirements" />}
+      {isPending && (
+        <Working label="Reading the JD, then scoring it against your resume" />
+      )}
 
       {state.error && <p className="text-red-500">{state.error}</p>}
 
@@ -49,6 +52,8 @@ export function JdForm() {
       {job && (
         <div className="flex flex-col gap-4">
           <JobTable rows={[job]} />
+
+          {state.match && <MatchResult outcome={state.match} jobId={job.id} />}
 
           <form action={pipelineAction} className="flex flex-col gap-3">
             <input type="hidden" name="job_id" value={job.id} />
