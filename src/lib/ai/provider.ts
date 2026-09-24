@@ -309,6 +309,8 @@ export type ResumeEducation = {
 };
 
 export type ExtractedResume = {
+  /** The resume's full text, minus contact details. */
+  body: string | null;
   headline: string | null;
   skills: string[];
   yearsExperience: number | null;
@@ -329,6 +331,9 @@ export async function extractResume(pdfBase64: string): Promise<ExtractedResume>
           {
             text: `Extract structured data from this resume.
 
+body — the resume's full text as plain text, in the order it appears,
+  including project and achievement lines. Leave out email addresses,
+  phone numbers and postal addresses.
 headline — one line: current or target role and seniority, as the resume
   presents it.
 skills — every skill the resume shows, each as a short lowercase name
@@ -353,6 +358,7 @@ isn't in the resume, return null or an empty list. Do not guess.`,
       responseSchema: {
         type: Type.OBJECT,
         properties: {
+          body: { type: Type.STRING },
           headline: { type: Type.STRING, nullable: true },
           skills: { type: Type.ARRAY, items: { type: Type.STRING } },
           yearsExperience: { type: Type.NUMBER, nullable: true },
@@ -383,7 +389,7 @@ isn't in the resume, return null or an empty list. Do not guess.`,
             },
           },
         },
-        required: ["headline", "skills", "yearsExperience", "experience", "education"],
+        required: ["body", "headline", "skills", "yearsExperience", "experience", "education"],
       },
     },
   });
@@ -400,7 +406,16 @@ isn't in the resume, return null or an empty list. Do not guess.`,
       )]
     : [];
 
+  // Belt and braces: strip anything that looks like a contact detail,
+  // whatever the model returned.
+  const body =
+    text(raw.body)
+      ?.replace(/[^\s@]+@[^\s@]+\.[^\s@]+/g, "")
+      .replace(/(\+?\d[\d\s().-]{8,}\d)/g, "")
+      .trim() ?? null;
+
   return {
+    body,
     headline: text(raw.headline),
     skills,
     yearsExperience: positiveNumber(raw.yearsExperience),
@@ -416,6 +431,8 @@ export type MatchVerdict = "met" | "missing" | "unclear";
 export type RawMatch = { n: number; verdict: MatchVerdict; evidence: string[] };
 
 export type ResumeForMatch = {
+  /** The resume's own words; richer than the extracted lists. */
+  body?: string | null;
   headline: string | null;
   skills: string[];
   yearsExperience: number | null;
@@ -437,6 +454,7 @@ export function resumeAsText(resume: ResumeForMatch): string {
   );
   return [
     `HEADLINE: ${resume.headline ?? "(none)"}`,
+    resume.body ? `FULL RESUME TEXT:\n${resume.body}` : "",
     `YEARS OF EXPERIENCE: ${resume.yearsExperience ?? "unknown"}`,
     `SKILLS: ${resume.skills.join(", ")}`,
     `EXPERIENCE:\n${roles.join("\n") || "(none listed)"}`,
@@ -466,8 +484,24 @@ verdict:
               is met by ANY ONE of them. Obvious equivalents count
               ("postgresql" for "postgres"; a B.Tech for a bachelor's degree).
   "missing" — the resume could show this but doesn't.
-  "unclear" — a resume can't really show it either way: attitude,
-              eagerness, curiosity, communication, teamwork, "willingness to…".
+  "unclear" — the requirement describes a personal quality rather than a
+              skill, tool, qualification or experience. Ask: could any
+              resume prove or disprove this? If not, it is "unclear", not
+              "missing". This covers traits and attitudes such as
+              resourcefulness, attention to detail, problem-solving,
+              curiosity, eagerness or willingness to learn, communication,
+              teamwork, work ethic, adaptability, being self-motivated.
+              Use "missing" only for things a resume could have shown and
+              doesn't: a named tool, language, framework, method,
+              qualification, or a kind of experience (e.g. Agile, TDD,
+              a degree, years in a role).
+
+Judge broad foundational requirements ("strong understanding of data
+structures and algorithms", "fundamental CS concepts", "OOP") against the
+whole resume: a computer science degree, relevant coursework, or projects
+that clearly rely on them count as met. Quote the degree or project line.
+A requirement naming examples ("databases (e.g. MySQL, Redis, MongoDB)")
+is met by any one of them appearing anywhere in the resume text.
 evidence — for "met": one or more short snippets copied WORD FOR WORD from
   the resume below, each on its own (not joined into one string). Empty
   list otherwise.

@@ -8,19 +8,37 @@ import type { JobDetails } from "./details";
  * is safe here only because this string is fixed in code — it must
  * never contain anything a user typed.
  */
-export const JOB_DETAIL_COLUMNS = sql.unsafe(`
-  location,
-  work_mode        as "workMode",
-  employment_type  as "employmentType",
-  experience_min   as "experienceMin",
-  salary_raw       as "salaryRaw",
-  salary_min::float8 as "salaryMin",
-  salary_max::float8 as "salaryMax",
-  salary_currency  as "salaryCurrency",
-  salary_period    as "salaryPeriod",
-  contact_email    as "contactEmail",
-  notes
-`);
+const COLUMNS: [string, string][] = [
+  ["location", "location"],
+  ["work_mode", "workMode"],
+  ["employment_type", "employmentType"],
+  ["experience_min", "experienceMin"],
+  ["salary_raw", "salaryRaw"],
+  ["salary_min::float8", "salaryMin"],
+  ["salary_max::float8", "salaryMax"],
+  ["salary_currency", "salaryCurrency"],
+  ["salary_period", "salaryPeriod"],
+  ["contact_email", "contactEmail"],
+  ["notes", "notes"],
+];
+
+/**
+ * The same column list for every query that reads job details, so the
+ * jobs page, the pipeline and the CSV can't drift apart.
+ *
+ * Pass the table's alias when the query joins another table that shares a
+ * column name — applications also has contact_email, and Postgres rejects
+ * an unqualified name that could mean either.
+ *
+ * sql.unsafe() is safe here only because this text is built in code from
+ * the fixed list above; it must never contain anything a user typed.
+ */
+export function jobDetailColumns(alias = "") {
+  const prefix = alias ? `${alias}.` : "";
+  return sql.unsafe(
+    COLUMNS.map(([column, name]) => `${prefix}${column} as "${name}"`).join(",\n  "),
+  );
+}
 
 /** Pulls just the detail fields off a database row. */
 export function toJobDetails(row: Record<string, unknown>): JobDetails {

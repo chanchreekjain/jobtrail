@@ -2,10 +2,16 @@
 
 import Link from "next/link";
 import { useTransition } from "react";
-import { toggleApplied, changeAppliedDate } from "../actions";
+import {
+  toggleApplied,
+  changeAppliedDate,
+  updateCompany,
+  updateContactEmail,
+} from "../actions";
 import type { Application } from "../repo";
 import { detailsSummary } from "@/features/jobs/details";
 import { MatchCell } from "@/features/match/ui/match-cell";
+import { EditableCell } from "./editable-cell";
 
 function todayLocal(): string {
   // en-CA formats as YYYY-MM-DD, and this uses the browser's timezone —
@@ -64,7 +70,13 @@ export function ApplicationsTable({
 
             return (
               <tr key={row.id} className="border-b border-gray-200">
-                <td className="py-3 pr-4">{row.company ?? "—"}</td>
+                <td className="py-3 pr-4">
+                  <EditableCell
+                    value={row.company}
+                    placeholder="Company"
+                    save={(v) => updateCompany(row.id, v)}
+                  />
+                </td>
                 <td className="py-3 pr-4">{row.role ?? "—"}</td>
                 <td className="py-3 pr-4 whitespace-nowrap">
                   <MatchCell row={row} hasResume={hasResume} />
@@ -76,16 +88,12 @@ export function ApplicationsTable({
                   )}
                 </td>
                 <td className="py-3 pr-4">
-                  {row.contactEmail ? (
-                    <a
-                      href={`mailto:${row.contactEmail}`}
-                      className="text-blue-600 hover:underline"
-                    >
-                      {row.contactEmail}
-                    </a>
-                  ) : (
-                    <span className="text-gray-400">—</span>
-                  )}
+                  <EditableCell
+                    value={row.contactEmail}
+                    placeholder="Add a contact"
+                    type="email"
+                    save={(v) => updateContactEmail(row.id, v)}
+                  />
                 </td>
                 <td className="py-3 pr-4">
                   <button

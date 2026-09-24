@@ -1,7 +1,7 @@
 import { createHash } from "crypto";
 import { sql } from "@/lib/db/client";
 import type { ExtractedJob, Requirement } from "@/lib/ai/provider";
-import { JOB_DETAIL_COLUMNS, toJobDetails } from "./details-sql";
+import { jobDetailColumns, toJobDetails } from "./details-sql";
 import type { JobDetails } from "./details";
 
 export type SavedJob = ExtractedJob & { id: string };
@@ -25,7 +25,7 @@ export async function findJobByHash(
       company,
       "position",
       to_char(deadline, 'YYYY-MM-DD') as deadline,
-      ${JOB_DETAIL_COLUMNS}
+      ${jobDetailColumns()}
     from jobs
     where jd_hash = ${hash} and user_id = ${userId}
   `;

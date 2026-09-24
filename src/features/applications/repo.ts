@@ -1,5 +1,5 @@
 import { sql } from "@/lib/db/client";
-import { JOB_DETAIL_COLUMNS, toJobDetails } from "@/features/jobs/details-sql";
+import { jobDetailColumns, toJobDetails } from "@/features/jobs/details-sql";
 import type { JobDetails } from "@/features/jobs/details";
 
 export type Application = {
@@ -49,12 +49,13 @@ export async function listApplications(userId: string): Promise<Application[]> {
       to_char(a.applied_at, 'YYYY-MM-DD') as applied_at,
       a.created_at,
       a.job_id,
+      a.contact_email as "ownContactEmail",
       m.id is not null as match_scored,
       m.score as match_score,
       m.must_met,
       m.must_total,
       m.method as match_method,
-      ${JOB_DETAIL_COLUMNS}
+      ${jobDetailColumns("j")}
     from applications a
     left join jobs j on j.id = a.job_id
     -- Only the match against the user's newest resume counts.
@@ -84,6 +85,10 @@ export async function listApplications(userId: string): Promise<Application[]> {
     must_total: r.must_total as number | null,
     match_method: (r.match_method as "ai" | "basic" | null) ?? null,
     ...toJobDetails(r),
+    // What the user typed wins over what the JD said.
+    contactEmail:
+      (r.ownContactEmail as string | null) ??
+      (toJobDetails(r).contactEmail as string | null),
   }));
 }
 
@@ -180,6 +185,30 @@ export async function updateAppliedDate(
   await sql`
     update applications
     set applied_at = ${onDate}::date
+    where id = ${id} and user_id = ${userId}
+  `;
+}
+
+export async function setContactEmail(
+  userId: string,
+  id: string,
+  email: string | null,
+): Promise<void> {
+  await sql`
+    update applications
+    set contact_email = ${email}
+    where id = ${id} and user_id = ${userId}
+  `;
+}
+
+export async function setCompany(
+  userId: string,
+  id: string,
+  company: string | null,
+): Promise<void> {
+  await sql`
+    update applications
+    set company = ${company}
     where id = ${id} and user_id = ${userId}
   `;
 }

@@ -55,15 +55,9 @@ export function MatchCell({ row, hasResume }: { row: Application; hasResume: boo
           <>
             <Link href={`/match/${row.job_id}`} className="hover:underline" title="See the breakdown">
               {row.match_score === null ? (
-                <span className="text-gray-500">No requirements</span>
+                <span className="text-gray-500">—</span>
               ) : (
-                <>
-                  <strong>{row.match_score}%</strong>{" "}
-                  <span className="text-xs text-gray-500">
-                    {row.must_met}/{row.must_total} must
-                    {row.match_method === "basic" && " · basic"}
-                  </span>
-                </>
+                <strong>{row.match_score}%</strong>
               )}
             </Link>
             {/* Score stays visible while it re-runs, so the row doesn't

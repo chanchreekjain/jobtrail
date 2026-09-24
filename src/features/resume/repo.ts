@@ -13,6 +13,7 @@ export async function findCurrentResume(userId: string): Promise<SavedResume | n
     select
       id,
       file_name as "fileName",
+      body,
       headline,
       skills,
       years_experience::float8 as "yearsExperience",
@@ -34,10 +35,10 @@ export async function saveResume(
 ): Promise<void> {
   await sql`
     insert into resumes (
-      user_id, file_name, headline, skills, years_experience, experience, education
+      user_id, file_name, body, headline, skills, years_experience, experience, education
     )
     values (
-      ${userId}, ${fileName}, ${resume.headline}, ${resume.skills},
+      ${userId}, ${fileName}, ${resume.body}, ${resume.headline}, ${resume.skills},
       ${resume.yearsExperience},
       ${JSON.stringify(resume.experience)}::jsonb,
       ${JSON.stringify(resume.education)}::jsonb

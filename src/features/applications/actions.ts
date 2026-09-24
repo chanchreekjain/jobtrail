@@ -9,6 +9,8 @@ import {
   markApplied,
   markNotApplied,
   updateAppliedDate,
+  setContactEmail,
+  setCompany,
 } from "./repo";
 
 function refresh() {
@@ -110,4 +112,35 @@ export async function changeAppliedDate(id: string, onDate: string) {
 
   await updateAppliedDate(user.id, id, onDate);
   refresh();
+}
+
+const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+/**
+ * Save a contact the user typed. An empty box clears their value, which
+ * brings back whatever the job description said.
+ * Returns an error string, or null when saved.
+ */
+export async function updateContactEmail(
+  id: string,
+  value: string,
+): Promise<string | null> {
+  const user = await requireUser();
+  const email = value.trim();
+
+  if (email && !EMAIL.test(email)) return "That doesn't look like an email address.";
+
+  await setContactEmail(user.id, id, email || null);
+  refresh();
+  return null;
+}
+
+/** The company name on this application. Empty clears it back to blank. */
+export async function updateCompany(id: string, value: string): Promise<string | null> {
+  const user = await requireUser();
+  const company = value.trim().slice(0, 200);
+
+  await setCompany(user.id, id, company || null);
+  refresh();
+  return null;
 }
