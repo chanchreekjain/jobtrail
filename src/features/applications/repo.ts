@@ -17,6 +17,8 @@ export type Application = {
   must_met: number | null;
   must_total: number | null;
   match_method: "ai" | "basic" | null;
+  /** A details line the user typed; overrides the JD-derived summary. */
+  detailsNote: string | null;
 } & JobDetails;
 
 export type Counts = {
@@ -50,6 +52,7 @@ export async function listApplications(userId: string): Promise<Application[]> {
       a.created_at,
       a.job_id,
       a.contact_email as "ownContactEmail",
+      a.details_note as "detailsNote",
       m.id is not null as match_scored,
       m.score as match_score,
       m.must_met,
@@ -84,6 +87,7 @@ export async function listApplications(userId: string): Promise<Application[]> {
     must_met: r.must_met as number | null,
     must_total: r.must_total as number | null,
     match_method: (r.match_method as "ai" | "basic" | null) ?? null,
+    detailsNote: (r.detailsNote as string | null) ?? null,
     ...toJobDetails(r),
     // What the user typed wins over what the JD said.
     contactEmail:
@@ -217,4 +221,16 @@ export async function setCompany(
 
 export async function deleteApplication(userId: string, id: string): Promise<void> {
   await sql`delete from applications where id = ${id} and user_id = ${userId}`;
+}
+
+export async function setDetailsNote(
+  userId: string,
+  id: string,
+  note: string | null,
+): Promise<void> {
+  await sql`
+    update applications
+    set details_note = ${note}
+    where id = ${id} and user_id = ${userId}
+  `;
 }

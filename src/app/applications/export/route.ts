@@ -62,6 +62,7 @@ export async function GET() {
       salaryPeriodLabel(a),
       a.contactEmail,
       a.notes,
+      a.detailsNote,
       day(a.created_at),
     ]),
   );

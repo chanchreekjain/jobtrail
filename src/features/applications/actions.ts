@@ -11,6 +11,7 @@ import {
   updateAppliedDate,
   setContactEmail,
   setCompany,
+  setDetailsNote,
   deleteApplication,
 } from "./repo";
 
@@ -160,4 +161,14 @@ export async function removeApplication(id: string): Promise<void> {
   const user = await requireUser();
   await deleteApplication(user.id, id);
   refresh();
+}
+
+/** The details line. Empty clears it back to what the JD said. */
+export async function updateDetails(id: string, value: string): Promise<string | null> {
+  const user = await requireUser();
+  const note = value.trim().slice(0, 300);
+
+  await setDetailsNote(user.id, id, note || null);
+  refresh();
+  return null;
 }

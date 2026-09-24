@@ -7,6 +7,7 @@ import {
   changeAppliedDate,
   updateCompany,
   updateContactEmail,
+  updateDetails,
   removeApplication,
 } from "../actions";
 import type { Application } from "../repo";
@@ -240,9 +241,13 @@ function MobileList({
               <MatchCell row={row} hasResume={hasResume} />
             </div>
 
-            {detailsSummary(row) && (
-              <p className="text-muted mt-2 text-sm">{detailsSummary(row)}</p>
-            )}
+            <div className="mt-2">
+              <EditableCell
+                value={row.detailsNote}
+                placeholder={detailsSummary(row) ?? "Add details"}
+                save={(v) => updateDetails(row.id, v)}
+              />
+            </div>
 
             <div className="mt-3">
               <EditableCell
