@@ -9,7 +9,14 @@ export type Section = { id: string; label: string };
  * IntersectionObserver rather than scroll maths — the browser does the
  * work, and it stays accurate when sections are different heights.
  */
-export function SectionNav({ sections }: { sections: Section[] }) {
+export function SectionNav({
+  sections,
+  horizontal = false,
+}: {
+  sections: Section[];
+  /** A scrollable row of chips instead of a column — used on phones. */
+  horizontal?: boolean;
+}) {
   const [active, setActive] = useState(sections[0]?.id ?? "");
 
   useEffect(() => {
@@ -30,6 +37,28 @@ export function SectionNav({ sections }: { sections: Section[] }) {
     }
     return () => observer.disconnect();
   }, [sections]);
+
+  if (horizontal) {
+    return (
+      <nav aria-label="On this page" className="overflow-x-auto">
+        <ul className="flex w-max gap-2 py-2.5 text-sm">
+          {sections.map((s) => (
+            <li key={s.id}>
+              <a
+                href={`#${s.id}`}
+                aria-current={active === s.id ? "true" : undefined}
+                className={`block rounded-full border px-3 py-1 whitespace-nowrap transition-colors ${
+                  active === s.id ? "border-accent text-text" : "border-line text-muted"
+                }`}
+              >
+                {s.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    );
+  }
 
   return (
     <nav aria-label="On this page" className="text-sm">

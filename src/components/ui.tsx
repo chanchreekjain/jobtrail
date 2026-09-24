@@ -92,7 +92,14 @@ export function Page({
 
       {sections ? (
         <div className="lg:grid lg:grid-cols-[1fr_11rem] lg:gap-10">
-          <div className="min-w-0">{children}</div>
+          <div className="min-w-0">
+            {/* Phones get the same links as a sticky row of chips under
+                the header, since there's no room for a column. */}
+            <div className="border-line bg-bg/90 sticky top-[3.25rem] z-10 mb-4 border-b backdrop-blur sm:top-14 lg:hidden">
+              <SectionNav sections={sections} horizontal />
+            </div>
+            {children}
+          </div>
           <aside className="sticky top-20 order-last hidden self-start lg:block">
             <SectionNav sections={sections} />
           </aside>
