@@ -29,5 +29,11 @@ export const config = {
    * and Next's static assets, which don't need a session check on every
    * image request. Everything else goes through the function above.
    */
-  matcher: ["/((?!api/auth|_next/static|_next/image|favicon.ico).*)"],
+  matcher: [
+    // Anything with a file extension is a static file in /public — the
+    // logo, the favicon, robots.txt. Without this, a signed-out visitor's
+    // browser asks for /logo.png and gets redirected to /login instead of
+    // an image, so the logo silently never loads.
+    "/((?!api/auth|_next/static|_next/image|.*\\.[\\w]+$).*)",
+  ],
 };
