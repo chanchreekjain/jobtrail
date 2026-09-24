@@ -12,7 +12,7 @@ import type { Application } from "../repo";
 import { detailsSummary } from "@/features/jobs/details";
 import { MatchCell } from "@/features/match/ui/match-cell";
 import { EditableCell } from "./editable-cell";
-import { Card, Empty } from "@/components/ui";
+import { ButtonLink, Card, Empty } from "@/components/ui";
 
 function todayLocal(): string {
   // en-CA formats as YYYY-MM-DD, and this uses the browser's timezone —
@@ -42,7 +42,15 @@ export function ApplicationsTable({
 
   if (rows.length === 0) {
     return (
-      <Empty>Nothing here yet — paste a JD and save it to your applications.</Empty>
+      <Empty>
+        <p className="text-text">Nothing saved yet</p>
+        <p className="mt-1">
+          Paste a job description and save it here to start tracking.
+        </p>
+        <ButtonLink href="/jd" size="sm" variant="primary" className="mt-4">
+          Paste a JD
+        </ButtonLink>
+      </Empty>
     );
   }
 
@@ -50,7 +58,7 @@ export function ApplicationsTable({
     <Card className="overflow-x-auto">
       <table className="w-full min-w-3xl border-collapse text-sm">
         <thead>
-          <tr className="border-b border-line text-left text-xs uppercase tracking-wide text-muted">
+          <tr className="border-line text-muted border-b text-left text-xs tracking-wide uppercase">
             <th className="px-3 py-2.5 font-medium">Company</th>
             <th className="px-3 py-2.5 font-medium">Role</th>
             <th className="px-3 py-2.5 font-medium">Match</th>
@@ -70,7 +78,7 @@ export function ApplicationsTable({
             return (
               <tr
                 key={row.id}
-                className="border-b border-line last:border-0 align-middle hover:bg-surface-2/60"
+                className="border-line hover:bg-surface-2/60 border-b align-middle last:border-0"
               >
                 <td className="px-3 py-2.5">
                   <EditableCell
@@ -83,10 +91,10 @@ export function ApplicationsTable({
                 <td className="px-3 py-2.5 whitespace-nowrap">
                   <MatchCell row={row} hasResume={hasResume} />
                 </td>
-                <td className="px-3 py-2.5 min-w-48">
+                <td className="min-w-48 px-3 py-2.5">
                   {detailsSummary(row) ?? <span className="text-faint">—</span>}
                   {row.notes && (
-                    <span className="block text-muted text-xs mt-1">{row.notes}</span>
+                    <span className="text-muted mt-1 block text-xs">{row.notes}</span>
                   )}
                 </td>
                 <td className="px-3 py-2.5">
@@ -105,16 +113,14 @@ export function ApplicationsTable({
                     aria-label={applied ? "Applied" : "Not applied"}
                     disabled={isPending}
                     onClick={() =>
-                      startTransition(() =>
-                        toggleApplied(row.id, !applied, today),
-                      )
+                      startTransition(() => toggleApplied(row.id, !applied, today))
                     }
                     className={`relative h-5 w-9 rounded-full transition-colors disabled:opacity-50 ${
                       applied ? "bg-positive" : "bg-line-strong"
                     }`}
                   >
                     <span
-                      className={`absolute top-0.5 h-4 w-4 rounded-full bg-surface transition-all ${
+                      className={`bg-surface absolute top-0.5 h-4 w-4 rounded-full transition-all ${
                         applied ? "left-[1.125rem]" : "left-0.5"
                       }`}
                     />
@@ -129,11 +135,9 @@ export function ApplicationsTable({
                       disabled={isPending}
                       onClick={(e) => openPicker(e.currentTarget)}
                       onChange={(e) =>
-                        startTransition(() =>
-                          changeAppliedDate(row.id, e.target.value),
-                        )
+                        startTransition(() => changeAppliedDate(row.id, e.target.value))
                       }
-                      className="tabular cursor-pointer rounded-[var(--radius)] border border-line-strong bg-transparent px-2 py-1 text-sm"
+                      className="tabular border-line-strong cursor-pointer rounded-[var(--radius)] border bg-transparent px-2 py-1 text-sm"
                     />
                   ) : (
                     <span className="text-faint">—</span>
@@ -143,7 +147,7 @@ export function ApplicationsTable({
                   {row.company && (
                     <Link
                       href={`/research?company=${encodeURIComponent(row.company)}`}
-                      className="border border-line-strong rounded-[var(--radius)] px-3 py-1 text-xs whitespace-nowrap hover:bg-surface-2"
+                      className="border-line-strong hover:bg-surface-2 rounded-[var(--radius)] border px-3 py-1 text-xs whitespace-nowrap"
                     >
                       Research
                     </Link>

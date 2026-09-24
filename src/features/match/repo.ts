@@ -33,7 +33,10 @@ export async function findJobForMatch(
   };
 }
 
-export async function findMatch(jobId: string, resumeId: string): Promise<Match | null> {
+export async function findMatch(
+  jobId: string,
+  resumeId: string,
+): Promise<Match | null> {
   const rows = await sql`
     select
       results, score, method,

@@ -25,7 +25,8 @@ export async function matchJob(
 
   const cached = await findMatch(jobId, resume.id);
   // A full AI match is final. A basic one is only a stand-in: try again.
-  if (!force && cached && cached.method === "ai") return { status: "ok", match: cached };
+  if (!force && cached && cached.method === "ai")
+    return { status: "ok", match: cached };
 
   if (job.requirements.length === 0) {
     const match: Match = { ...summarise([]), results: [], method: "ai" };
@@ -62,7 +63,14 @@ export async function matchJob(
     const m = byNumber.get(i + 1);
 
     if (m?.verdict === "unclear") {
-      return { text: r.text, skill: r.skill, kind: r.kind, met: false, assessable: false, evidence: null };
+      return {
+        text: r.text,
+        skill: r.skill,
+        kind: r.kind,
+        met: false,
+        assessable: false,
+        evidence: null,
+      };
     }
 
     // "Met" survives only with at least one quote that's really in the

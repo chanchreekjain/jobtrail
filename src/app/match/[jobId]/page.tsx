@@ -55,8 +55,8 @@ export default async function MatchPage({
 
       {outcome.status === "unavailable" && (
         <p className="text-muted">
-          The AI is busy right now, so this one isn&apos;t scored yet. Reload in
-          a minute.
+          The AI is busy right now, so this one isn&apos;t scored yet. Reload in a
+          minute.
         </p>
       )}
 
@@ -68,37 +68,46 @@ export default async function MatchPage({
             <p className="tabular text-4xl font-semibold">
               {outcome.match.score === null ? "—" : `${outcome.match.score}%`}
             </p>
-            <p className="text-sm text-muted">
+            <p className="text-muted text-sm">
               {outcome.match.mustMet} of {outcome.match.mustTotal} must-haves ·{" "}
               {outcome.match.niceMet} of {outcome.match.niceTotal} nice-to-haves
             </p>
             {job.experienceMin != null && resume?.yearsExperience != null && (
-              <p className="text-sm text-muted">
+              <p className="text-muted text-sm">
                 Asks for {job.experienceMin}+ years; your resume shows about{" "}
                 {resume.yearsExperience}.
               </p>
             )}
             {outcome.match.method === "basic" && (
-              <p className="text-sm text-warning pt-2">
-                Basic match: the AI was busy, so only exact skill names were
-                compared. Similar skills (like &ldquo;postgres&rdquo; and
-                &ldquo;postgresql&rdquo;) weren&apos;t counted, so the real score
-                may be higher. Reload this page later to redo it properly.
+              <p className="text-warning pt-2 text-sm">
+                Basic match: the AI was busy, so only exact skill names were compared.
+                Similar skills (like &ldquo;postgres&rdquo; and
+                &ldquo;postgresql&rdquo;) weren&apos;t counted, so the real score may be
+                higher. Reload this page later to redo it properly.
               </p>
             )}
-            <p className="pt-2 text-xs text-muted">
-              Must-haves count double. A requirement only counts as met when
-              your resume shows it — worth checking the misses, in case your
-              resume undersells you.
+            <p className="text-muted pt-2 text-xs">
+              Must-haves count double. A requirement only counts as met when your resume
+              shows it — worth checking the misses, in case your resume undersells you.
             </p>
           </Card>
 
           {!inPipeline && (
-            <SaveToPipeline jobId={jobId} company={job.company} position={job.position} />
+            <SaveToPipeline
+              jobId={jobId}
+              company={job.company}
+              position={job.position}
+            />
           )}
 
-          <Checklist title="Must-haves" items={outcome.match.results.filter((r) => r.kind === "must")} />
-          <Checklist title="Nice-to-haves" items={outcome.match.results.filter((r) => r.kind === "nice")} />
+          <Checklist
+            title="Must-haves"
+            items={outcome.match.results.filter((r) => r.kind === "must")}
+          />
+          <Checklist
+            title="Nice-to-haves"
+            items={outcome.match.results.filter((r) => r.kind === "nice")}
+          />
         </>
       )}
     </main>
@@ -114,12 +123,14 @@ function Checklist({ title, items }: { title: string; items: RequirementResult[]
 
   return (
     <section>
-      <h2 className="mb-3 text-xs uppercase tracking-wide text-muted">{title}</h2>
+      <h2 className="text-muted mb-3 text-xs tracking-wide uppercase">{title}</h2>
       <ul className="space-y-2.5">
         {sorted.map((r, i) => (
           <li key={i} className="flex gap-3 text-sm leading-relaxed">
             {r.assessable === false ? (
-              <span aria-label="Not scored" className="text-faint">–</span>
+              <span aria-label="Not scored" className="text-faint">
+                –
+              </span>
             ) : (
               <span
                 aria-label={r.met ? "Met" : "Not met"}
@@ -131,12 +142,13 @@ function Checklist({ title, items }: { title: string; items: RequirementResult[]
             <span>
               {r.text}
               {r.assessable === false && (
-                <span className="block text-xs text-muted">
-                  Not scored — a resume can&apos;t really show this. Worth a line in your cover letter.
+                <span className="text-muted block text-xs">
+                  Not scored — a resume can&apos;t really show this. Worth a line in
+                  your cover letter.
                 </span>
               )}
               {r.evidence && (
-                <span className="block text-xs text-muted">
+                <span className="text-muted block text-xs">
                   Your resume: &ldquo;{r.evidence}&rdquo;
                 </span>
               )}

@@ -36,7 +36,7 @@ export function ResearchPanel({ initialCompany }: { initialCompany: string }) {
 
   return (
     <div>
-      <form action={formAction} className="flex gap-2 mb-8">
+      <form action={formAction} className="mb-8 flex gap-2">
         <input
           // Remount when the company changes, so picking a suggestion
           // updates the box — defaultValue alone is only read once.
@@ -45,7 +45,7 @@ export function ResearchPanel({ initialCompany }: { initialCompany: string }) {
           defaultValue={state.company}
           placeholder="Company name"
           required
-          className="h-10 flex-1 rounded-[var(--radius)] border border-line-strong bg-surface px-3 text-sm placeholder:text-faint"
+          className="border-line-strong bg-surface placeholder:text-faint h-10 flex-1 rounded-[var(--radius)] border px-3 text-sm"
         />
         <button
           type="submit"
@@ -62,15 +62,13 @@ export function ResearchPanel({ initialCompany }: { initialCompany: string }) {
         </div>
       )}
 
-      {result?.status === "error" && (
-        <p className="text-negative">{result.message}</p>
-      )}
+      {result?.status === "error" && <p className="text-negative">{result.message}</p>}
 
       {result?.status === "suggest" && (
         <div className="mb-6 space-y-3">
           <p>
-            Did you mean <strong>{result.suggestion}</strong>? It&apos;s already
-            been researched, so it&apos;s free.
+            Did you mean <strong>{result.suggestion}</strong>? It&apos;s already been
+            researched, so it&apos;s free.
           </p>
           <div className="flex flex-wrap gap-2">
             <form action={formAction}>
@@ -89,7 +87,7 @@ export function ResearchPanel({ initialCompany }: { initialCompany: string }) {
               <button
                 type="submit"
                 disabled={isPending}
-                className="border border-line-strong rounded-[var(--radius)] px-4 py-2 disabled:opacity-50"
+                className="border-line-strong rounded-[var(--radius)] border px-4 py-2 disabled:opacity-50"
               >
                 No, research &ldquo;{result.typed}&rdquo; (uses a lookup)
               </button>
@@ -100,18 +98,15 @@ export function ResearchPanel({ initialCompany }: { initialCompany: string }) {
 
       {result?.status === "limit" && (
         <p className="text-muted mb-6">
-          You&apos;ve used this week&apos;s research lookups. Companies someone
-          has already researched still load for free, and the links below
-          always work.
+          You&apos;ve used this week&apos;s research lookups. Companies someone has
+          already researched still load for free, and the links below always work.
         </p>
       )}
 
       {result?.status === "ok" && (
         <Card className="space-y-6 p-5">
           <div>
-            <h2 className="text-xl font-semibold mb-2">
-              {result.intel.companyName}
-            </h2>
+            <h2 className="mb-2 text-xl font-semibold">{result.intel.companyName}</h2>
             <p>{result.intel.data.summary}</p>
           </div>
 
@@ -132,7 +127,7 @@ export function ResearchPanel({ initialCompany }: { initialCompany: string }) {
             </ul>
           )}
 
-          <div className="text-sm space-y-1">
+          <div className="space-y-1 text-sm">
             {result.intel.data.careersUrl && (
               <p>
                 Careers page:{" "}
@@ -158,7 +153,7 @@ export function ResearchPanel({ initialCompany }: { initialCompany: string }) {
             )}
           </div>
 
-          <p className="text-xs text-faint">
+          <p className="text-faint text-xs">
             {result.cached
               ? `Already researched on ${new Date(result.intel.fetchedAt).toLocaleDateString()} — didn't use a lookup.`
               : "Freshly researched."}{" "}

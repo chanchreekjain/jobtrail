@@ -46,10 +46,7 @@ async function generate(request: Request) {
     try {
       // One try per model: an overloaded model rarely recovers within
       // seconds, and a different model is the better bet than waiting.
-      return await withRetry(
-        () => ai.models.generateContent({ ...request, model }),
-        1,
-      );
+      return await withRetry(() => ai.models.generateContent({ ...request, model }), 1);
     } catch (error) {
       lastError = error;
       const status = (error as { status?: number }).status;
@@ -90,7 +87,12 @@ export type ExtractedJob = {
 };
 
 const WORK_MODES: WorkMode[] = ["remote", "hybrid", "onsite"];
-const EMPLOYMENT_TYPES: EmploymentType[] = ["full_time", "part_time", "contract", "internship"];
+const EMPLOYMENT_TYPES: EmploymentType[] = [
+  "full_time",
+  "part_time",
+  "contract",
+  "internship",
+];
 const SALARY_PERIODS: SalaryPeriod[] = ["year", "month", "hour"];
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -100,7 +102,9 @@ function oneOf<T extends string>(value: unknown, allowed: T[]): T | null {
 }
 
 function positiveNumber(value: unknown): number | null {
-  return typeof value === "number" && Number.isFinite(value) && value >= 0 ? value : null;
+  return typeof value === "number" && Number.isFinite(value) && value >= 0
+    ? value
+    : null;
 }
 
 function text(value: unknown): string | null {
@@ -168,10 +172,21 @@ ${rawJd}`,
           },
         },
         required: [
-          "company", "position", "deadline", "location", "workMode",
-          "employmentType", "experienceMin", "salaryRaw", "salaryMin",
-          "salaryMax", "salaryCurrency", "salaryPeriod", "contactEmail",
-          "notes", "requirements",
+          "company",
+          "position",
+          "deadline",
+          "location",
+          "workMode",
+          "employmentType",
+          "experienceMin",
+          "salaryRaw",
+          "salaryMin",
+          "salaryMax",
+          "salaryCurrency",
+          "salaryPeriod",
+          "contactEmail",
+          "notes",
+          "requirements",
         ],
       },
     },
@@ -286,7 +301,13 @@ ${numbered}`,
           careersSource: { type: Type.INTEGER, nullable: true },
           recruitingContact: { type: Type.STRING, nullable: true },
         },
-        required: ["companyName", "summary", "facts", "careersSource", "recruitingContact"],
+        required: [
+          "companyName",
+          "summary",
+          "facts",
+          "careersSource",
+          "recruitingContact",
+        ],
       },
     },
   });
@@ -389,7 +410,14 @@ isn't in the resume, return null or an empty list. Do not guess.`,
             },
           },
         },
-        required: ["body", "headline", "skills", "yearsExperience", "experience", "education"],
+        required: [
+          "body",
+          "headline",
+          "skills",
+          "yearsExperience",
+          "experience",
+          "education",
+        ],
       },
     },
   });
@@ -398,12 +426,14 @@ isn't in the resume, return null or an empty list. Do not guess.`,
 
   // Normalise skills the same way every time: lowercase, trimmed, deduped.
   const skills = Array.isArray(raw.skills)
-    ? [...new Set(
-        (raw.skills as unknown[])
-          .filter((s): s is string => typeof s === "string")
-          .map((s) => s.trim().toLowerCase())
-          .filter(Boolean),
-      )]
+    ? [
+        ...new Set(
+          (raw.skills as unknown[])
+            .filter((s): s is string => typeof s === "string")
+            .map((s) => s.trim().toLowerCase())
+            .filter(Boolean),
+        ),
+      ]
     : [];
 
   // Belt and braces: strip anything that looks like a contact detail,
@@ -472,7 +502,9 @@ export async function matchRequirements(
   requirements: RequirementToMatch[],
   resume: ResumeForMatch,
 ): Promise<RawMatch[]> {
-  const reqList = requirements.map((r) => `[${r.n}] ${r.text} (skill: ${r.skill})`).join("\n");
+  const reqList = requirements
+    .map((r) => `[${r.n}] ${r.text} (skill: ${r.skill})`)
+    .join("\n");
 
   const response = await generate({
     contents: `Decide, for each numbered job requirement, whether this candidate's

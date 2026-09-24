@@ -15,9 +15,14 @@ export default async function ApplicationsPage() {
       description={`${applications.length} ${applications.length === 1 ? "application" : "applications"}`}
       actions={
         <>
-          <ButtonLink href="/research" size="sm">Research a company</ButtonLink>
+          <ButtonLink href="/research" size="sm">
+            Research a company
+          </ButtonLink>
           {applications.length > 0 && (
-            <a href="/applications/export" className="inline-flex h-8 items-center rounded-[var(--radius)] border border-line-strong px-3 text-sm font-medium hover:bg-surface-2">
+            <a
+              href="/applications/export"
+              className="border-line-strong hover:bg-surface-2 inline-flex h-8 items-center rounded-[var(--radius)] border px-3 text-sm font-medium"
+            >
               Download CSV
             </a>
           )}

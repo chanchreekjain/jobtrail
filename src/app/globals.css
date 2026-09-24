@@ -18,15 +18,15 @@
   --surface-2: #e9f0f0;
   --line: #d6e2e2;
   --line-strong: #b6c9c9;
-  --text: #10333f;          /* navy from the wordmark */
+  --text: #10333f; /* navy from the wordmark */
   --muted: #56707a;
   --faint: #8aa0a7;
 
-  --accent: #14776a;        /* teal, darkened so white text passes contrast */
+  --accent: #14776a; /* teal, darkened so white text passes contrast */
   --accent-text: #ffffff;
   --accent-soft: #dbeeea;
 
-  --positive: #4f8c2f;      /* the logo's lime, darkened for text */
+  --positive: #4f8c2f; /* the logo's lime, darkened for text */
   --negative: #b4392f;
   --warning: #8a6116;
 
@@ -35,24 +35,24 @@
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-  color-scheme: dark;
+    color-scheme: dark;
 
-  --bg: #0b1c22;
-  --surface: #11282f;
-  --surface-2: #17343c;
-  --line: #1f424b;
-  --line-strong: #2d5b66;
-  --text: #e6f0f0;
-  --muted: #9db3b9;
-  --faint: #6d868e;
+    --bg: #0b1c22;
+    --surface: #11282f;
+    --surface-2: #17343c;
+    --line: #1f424b;
+    --line-strong: #2d5b66;
+    --text: #e6f0f0;
+    --muted: #9db3b9;
+    --faint: #6d868e;
 
-  --accent: #3fbfa6;        /* the logo's teal, bright enough on dark */
-  --accent-text: #06231f;
-  --accent-soft: #123a38;
+    --accent: #3fbfa6; /* the logo's teal, bright enough on dark */
+    --accent-text: #06231f;
+    --accent-soft: #123a38;
 
-  --positive: #a8cf6a;      /* the logo's lime */
-  --negative: #e8796d;
-  --warning: #d9a640;
+    --positive: #a8cf6a; /* the logo's lime */
+    --negative: #e8796d;
+    --warning: #d9a640;
   }
 }
 
@@ -68,11 +68,11 @@
   --muted: #9db3b9;
   --faint: #6d868e;
 
-  --accent: #3fbfa6;        /* the logo's teal, bright enough on dark */
+  --accent: #3fbfa6; /* the logo's teal, bright enough on dark */
   --accent-text: #06231f;
   --accent-soft: #123a38;
 
-  --positive: #a8cf6a;      /* the logo's lime */
+  --positive: #a8cf6a; /* the logo's lime */
   --negative: #e8796d;
   --warning: #d9a640;
 }
@@ -109,7 +109,9 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-h1, h2, h3 {
+h1,
+h2,
+h3 {
   letter-spacing: -0.015em;
 }
 

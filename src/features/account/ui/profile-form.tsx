@@ -16,7 +16,7 @@ export function ProfileForm({
   );
 
   return (
-    <form action={action} className="space-y-2 max-w-sm">
+    <form action={action} className="max-w-sm space-y-2">
       <label htmlFor="displayName" className="block text-sm">
         Display name
       </label>
@@ -27,7 +27,7 @@ export function ProfileForm({
           defaultValue={displayName ?? ""}
           placeholder={googleName ?? "Your name"}
           maxLength={60}
-          className="flex-1 border border-line-strong rounded-[var(--radius)] px-3 py-2 bg-transparent"
+          className="border-line-strong flex-1 rounded-[var(--radius)] border bg-transparent px-3 py-2"
         />
         <button
           type="submit"
@@ -37,9 +37,7 @@ export function ProfileForm({
           {isPending ? "Saving…" : "Save"}
         </button>
       </div>
-      <p className="text-xs text-muted">
-        Leave it empty to use your Google name.
-      </p>
+      <p className="text-muted text-xs">Leave it empty to use your Google name.</p>
       {state.message && (
         <p className={`text-sm ${state.ok ? "text-positive" : "text-negative"}`}>
           {state.message}

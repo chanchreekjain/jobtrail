@@ -33,7 +33,9 @@ export function Button({
   className = "",
   ...props
 }: ComponentProps<"button"> & ButtonStyle) {
-  return <button className={`${buttonClass({ variant, size })} ${className}`} {...props} />;
+  return (
+    <button className={`${buttonClass({ variant, size })} ${className}`} {...props} />
+  );
 }
 
 export function ButtonLink({
@@ -42,13 +44,15 @@ export function ButtonLink({
   className = "",
   ...props
 }: ComponentProps<typeof Link> & ButtonStyle) {
-  return <Link className={`${buttonClass({ variant, size })} ${className}`} {...props} />;
+  return (
+    <Link className={`${buttonClass({ variant, size })} ${className}`} {...props} />
+  );
 }
 
 export function Card({ className = "", ...props }: ComponentProps<"div">) {
   return (
     <div
-      className={`rounded-[var(--radius)] border border-line bg-surface ${className}`}
+      className={`border-line bg-surface rounded-[var(--radius)] border ${className}`}
       {...props}
     />
   );
@@ -77,7 +81,7 @@ export function Page({
       <header className="mb-8 flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold">{title}</h1>
-          {description && <p className="mt-1 text-sm text-muted">{description}</p>}
+          {description && <p className="text-muted mt-1 text-sm">{description}</p>}
         </div>
         {actions && <div className="flex flex-wrap gap-2">{actions}</div>}
       </header>
@@ -89,28 +93,26 @@ export function Page({
 export function Field({ className = "", ...props }: ComponentProps<"input">) {
   return (
     <input
-      className={`h-10 w-full rounded-[var(--radius)] border border-line-strong bg-transparent px-3 text-sm placeholder:text-faint ${className}`}
+      className={`border-line-strong placeholder:text-faint h-10 w-full rounded-[var(--radius)] border bg-transparent px-3 text-sm ${className}`}
       {...props}
     />
   );
 }
 
 export function Label({ className = "", ...props }: ComponentProps<"label">) {
-  return <label className={`block text-sm text-muted ${className}`} {...props} />;
+  return <label className={`text-muted block text-sm ${className}`} {...props} />;
 }
 
 /** A small chip: skills, states, counts. */
 export function Tag({ className = "", ...props }: ComponentProps<"span">) {
   return (
     <span
-      className={`inline-flex items-center rounded-full border border-line px-2 py-0.5 text-xs text-muted ${className}`}
+      className={`border-line text-muted inline-flex items-center rounded-full border px-2 py-0.5 text-xs ${className}`}
       {...props}
     />
   );
 }
 
 export function Empty({ children }: { children: ReactNode }) {
-  return (
-    <Card className="px-6 py-10 text-center text-sm text-muted">{children}</Card>
-  );
+  return <Card className="text-muted px-6 py-10 text-center text-sm">{children}</Card>;
 }

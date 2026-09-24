@@ -32,7 +32,13 @@ function scoreColour(score: number) {
   return "text-negative";
 }
 
-export function MatchCell({ row, hasResume }: { row: Application; hasResume: boolean }) {
+export function MatchCell({
+  row,
+  hasResume,
+}: {
+  row: Application;
+  hasResume: boolean;
+}) {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
@@ -41,7 +47,7 @@ export function MatchCell({ row, hasResume }: { row: Application; hasResume: boo
 
   if (!hasResume) {
     return (
-      <Link href="/resume" className="text-xs text-accent hover:underline">
+      <Link href="/resume" className="text-accent text-xs hover:underline">
         Upload resume
       </Link>
     );
@@ -51,7 +57,8 @@ export function MatchCell({ row, hasResume }: { row: Application; hasResume: boo
     startTransition(async () => {
       setError(null);
       const outcome = await scoreJob(row.job_id!, force);
-      if (outcome.status === "unavailable") setError("AI busy — try again in a minute.");
+      if (outcome.status === "unavailable")
+        setError("AI busy — try again in a minute.");
       else if (outcome.status === "error") setError(outcome.message);
     });
 
@@ -60,7 +67,11 @@ export function MatchCell({ row, hasResume }: { row: Application; hasResume: boo
       <div className="flex items-center gap-2">
         {row.match_scored ? (
           <>
-            <Link href={`/match/${row.job_id}`} className="hover:underline" title="See the breakdown">
+            <Link
+              href={`/match/${row.job_id}`}
+              className="hover:underline"
+              title="See the breakdown"
+            >
               {row.match_score === null ? (
                 <span className="text-muted">—</span>
               ) : (
@@ -89,13 +100,13 @@ export function MatchCell({ row, hasResume }: { row: Application; hasResume: boo
             type="button"
             onClick={() => run(false)}
             disabled={isPending}
-            className="border border-line-strong rounded-[var(--radius)] px-3 py-1 text-xs hover:bg-surface-2 disabled:opacity-50"
+            className="border-line-strong hover:bg-surface-2 rounded-[var(--radius)] border px-3 py-1 text-xs disabled:opacity-50"
           >
             {isPending ? "Scoring…" : "Score"}
           </button>
         )}
       </div>
-      {error && <p className="text-xs text-negative whitespace-normal">{error}</p>}
+      {error && <p className="text-negative text-xs whitespace-normal">{error}</p>}
     </div>
   );
 }

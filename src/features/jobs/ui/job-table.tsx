@@ -11,9 +11,9 @@ export type JobRow = {
 export function JobTable({ rows }: { rows: JobRow[] }) {
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-sm border-collapse">
+      <table className="w-full border-collapse text-sm">
         <thead>
-          <tr className="border-b border-line text-left text-xs uppercase tracking-wide text-muted">
+          <tr className="border-line text-muted border-b text-left text-xs tracking-wide uppercase">
             <th className="px-3 py-2.5 font-medium">Company</th>
             <th className="px-3 py-2.5 font-medium">Position</th>
             <th className="px-3 py-2.5 font-medium">Details</th>
@@ -24,21 +24,21 @@ export function JobTable({ rows }: { rows: JobRow[] }) {
         </thead>
         <tbody>
           {rows.map((row, i) => (
-            <tr key={row.id ?? i} className="border-b border-line align-top">
+            <tr key={row.id ?? i} className="border-line border-b align-top">
               <td className="px-3 py-3 align-top">{row.company ?? "—"}</td>
               <td className="px-3 py-3 align-top">{row.position ?? "—"}</td>
-              <td className="px-3 py-3 align-top min-w-48">
+              <td className="min-w-48 px-3 py-3 align-top">
                 {detailsSummary(row) ?? "—"}
                 {row.contactEmail && (
                   <a
                     href={`mailto:${row.contactEmail}`}
-                    className="block text-accent hover:underline"
+                    className="text-accent block hover:underline"
                   >
                     {row.contactEmail}
                   </a>
                 )}
                 {row.notes && (
-                  <span className="block text-muted mt-1">{row.notes}</span>
+                  <span className="text-muted mt-1 block">{row.notes}</span>
                 )}
               </td>
               <td className="px-3 py-3 align-top">{row.deadline ?? "—"}</td>
@@ -62,7 +62,10 @@ function Skills({ items }: { items: { skill: string }[] }) {
   return (
     <div className="flex flex-wrap gap-1">
       {items.map((r, i) => (
-        <span key={i} className="border border-line rounded-[var(--radius)] px-2 py-0.5 text-xs">
+        <span
+          key={i}
+          className="border-line rounded-[var(--radius)] border px-2 py-0.5 text-xs"
+        >
           {r.skill}
         </span>
       ))}

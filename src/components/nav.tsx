@@ -12,12 +12,18 @@ export async function Nav() {
   const account = user?.email ? await currentUser() : null;
 
   return (
-    <header className="sticky top-0 z-20 border-b border-line bg-bg/85 backdrop-blur">
+    <header className="border-line bg-bg/85 sticky top-0 z-20 border-b backdrop-blur">
       <div className="mx-auto flex h-14 w-full max-w-5xl items-center gap-6 px-6 sm:px-8">
         <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight">
           {/* The mark itself, background and grid stripped out. */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.png" alt="" width={26} height={26} className="h-[26px] w-[26px]" />
+          <img
+            src="/logo.png"
+            alt=""
+            width={26}
+            height={26}
+            className="h-[26px] w-[26px]"
+          />
           jobtrail
         </Link>
 

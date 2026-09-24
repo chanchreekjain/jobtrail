@@ -41,14 +41,19 @@ export function ProfileMenu({ name, email, image }: Props) {
         aria-haspopup="menu"
         aria-expanded={open}
         aria-label="Account menu"
-        className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full border border-line bg-surface-2 text-xs font-semibold"
+        className="border-line bg-surface-2 flex h-8 w-8 items-center justify-center overflow-hidden rounded-full border text-xs font-semibold"
       >
         {image ? (
           // A plain <img>: next/image would need Google's image host added
           // to the config. no-referrer because Google's avatar host can
           // refuse requests that say which site they came from.
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={image} alt="" referrerPolicy="no-referrer" className="h-full w-full object-cover" />
+          <img
+            src={image}
+            alt=""
+            referrerPolicy="no-referrer"
+            className="h-full w-full object-cover"
+          />
         ) : (
           initial
         )}
@@ -57,17 +62,17 @@ export function ProfileMenu({ name, email, image }: Props) {
       {open && (
         <div
           role="menu"
-          className="absolute right-0 z-20 mt-2 w-60 overflow-hidden rounded-[var(--radius)] border border-line bg-surface text-sm shadow-lg"
+          className="border-line bg-surface absolute right-0 z-20 mt-2 w-60 overflow-hidden rounded-[var(--radius)] border text-sm shadow-lg"
         >
-          <div className="border-b border-line px-4 py-3">
-            {name && <p className="font-medium truncate">{name}</p>}
-            <p className="truncate text-muted">{email}</p>
+          <div className="border-line border-b px-4 py-3">
+            {name && <p className="truncate font-medium">{name}</p>}
+            <p className="text-muted truncate">{email}</p>
           </div>
           <Link
             href="/settings"
             role="menuitem"
             onClick={() => setOpen(false)}
-            className="block px-4 py-2 hover:bg-surface-2"
+            className="hover:bg-surface-2 block px-4 py-2"
           >
             Settings
           </Link>
@@ -75,7 +80,7 @@ export function ProfileMenu({ name, email, image }: Props) {
             <button
               type="submit"
               role="menuitem"
-              className="w-full border-t border-line px-4 py-2 text-left hover:bg-surface-2"
+              className="border-line hover:bg-surface-2 w-full border-t px-4 py-2 text-left"
             >
               Sign out
             </button>

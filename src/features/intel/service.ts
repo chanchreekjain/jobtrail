@@ -65,7 +65,10 @@ export async function researchCompany(
     sources = results.map((r, i) => ({ n: i + 1, ...r }));
   } catch (error) {
     console.error("[intel] search failed:", (error as Error).message);
-    return { status: "error", message: "Search is unavailable right now. Try again later." };
+    return {
+      status: "error",
+      message: "Search is unavailable right now. Try again later.",
+    };
   }
 
   if (sources.length === 0) {
@@ -127,7 +130,7 @@ function validate(
     .map((f) => ({ claim: f.claim.trim(), sourceUrl: byNumber.get(f.source)!.url }));
 
   const careersUrl =
-    raw.careersSource != null ? byNumber.get(raw.careersSource)?.url ?? null : null;
+    raw.careersSource != null ? (byNumber.get(raw.careersSource)?.url ?? null) : null;
 
   // Keep a contact only if it's a real email AND appears word for word in
   // a source. If the model produced it, rather than copied it, it's gone.
@@ -135,7 +138,8 @@ function validate(
   const seenInSources = sources.some((s) =>
     s.content.toLowerCase().includes(contact.toLowerCase()),
   );
-  const recruitingContact = contact && EMAIL.test(contact) && seenInSources ? contact : null;
+  const recruitingContact =
+    contact && EMAIL.test(contact) && seenInSources ? contact : null;
 
   return {
     summary: (raw.summary ?? "").trim(),

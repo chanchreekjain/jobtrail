@@ -29,10 +29,22 @@ export async function GET() {
 
   const csv = toCsv(
     [
-      "Company", "Role", "Status", "Applied on", "Location", "Work mode",
-      "Employment type", "Min experience (yrs)", "Salary",
-      "Salary min", "Salary max", "Currency", "Pay period",
-      "Contact email", "Notes", "Added on",
+      "Company",
+      "Role",
+      "Status",
+      "Applied on",
+      "Location",
+      "Work mode",
+      "Employment type",
+      "Min experience (yrs)",
+      "Salary",
+      "Salary min",
+      "Salary max",
+      "Currency",
+      "Pay period",
+      "Contact email",
+      "Notes",
+      "Added on",
     ],
     applications.map((a) => [
       a.company,

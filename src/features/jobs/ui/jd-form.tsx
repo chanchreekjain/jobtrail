@@ -39,7 +39,7 @@ export function JdForm({
           defaultValue={initialText}
           required
           placeholder="Paste the job description here…"
-          className="w-full rounded-[var(--radius)] border border-line-strong bg-surface px-3 py-2.5 text-sm leading-relaxed placeholder:text-faint"
+          className="border-line-strong bg-surface placeholder:text-faint w-full rounded-[var(--radius)] border px-3 py-2.5 text-sm leading-relaxed"
         />
         <button
           type="submit"
@@ -57,7 +57,7 @@ export function JdForm({
       {state.error && <p className="text-negative">{state.error}</p>}
 
       {state.cached && (
-        <p className="text-sm text-muted">Loaded from database — no API call.</p>
+        <p className="text-muted text-sm">Loaded from database — no API call.</p>
       )}
 
       {job && (

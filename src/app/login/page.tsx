@@ -27,7 +27,7 @@ export default async function LoginPage({
   return (
     <main className="mx-auto w-full max-w-sm px-6 py-20">
       <h1 className="text-2xl font-semibold">Sign in</h1>
-      <p className="mt-2 mb-8 text-muted">
+      <p className="text-muted mt-2 mb-8">
         So your applications follow you across devices.
       </p>
 
@@ -39,7 +39,7 @@ export default async function LoginPage({
       >
         <button
           type="submit"
-          className="h-10 w-full rounded-[var(--radius)] border border-line-strong text-sm font-medium transition-colors hover:bg-surface-2"
+          className="border-line-strong hover:bg-surface-2 h-10 w-full rounded-[var(--radius)] border text-sm font-medium transition-colors"
         >
           Continue with Google
         </button>

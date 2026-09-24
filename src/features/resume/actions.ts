@@ -20,7 +20,10 @@ export async function uploadResume(
     return { message: "Choose a PDF first.", ok: false };
   }
   if (file.size > MAX_BYTES) {
-    return { message: "That file is over 4MB. Try exporting a smaller PDF.", ok: false };
+    return {
+      message: "That file is over 4MB. Try exporting a smaller PDF.",
+      ok: false,
+    };
   }
 
   const bytes = Buffer.from(await file.arrayBuffer());
@@ -36,7 +39,8 @@ export async function uploadResume(
     const resume = await extractResume(bytes.toString("base64"));
     if (resume.skills.length === 0 && resume.experience.length === 0) {
       return {
-        message: "Couldn't read anything from that PDF. If it's a scan, try a text-based export.",
+        message:
+          "Couldn't read anything from that PDF. If it's a scan, try a text-based export.",
         ok: false,
       };
     }

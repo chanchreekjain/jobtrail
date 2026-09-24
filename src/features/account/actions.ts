@@ -41,7 +41,9 @@ export async function updateDisplayName(
   const user = await requireUser();
 
   // Collapse runs of spaces; an empty box means "go back to my Google name".
-  const name = String(formData.get("displayName") ?? "").replace(/\s+/g, " ").trim();
+  const name = String(formData.get("displayName") ?? "")
+    .replace(/\s+/g, " ")
+    .trim();
 
   if (name.length > MAX_NAME) {
     return { message: `Keep it under ${MAX_NAME} characters.`, ok: false };

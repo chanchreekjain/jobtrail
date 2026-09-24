@@ -25,28 +25,28 @@ export function SaveToPipeline({
       <input type="hidden" name="job_id" value={jobId} />
 
       {company === null && (
-        <label className="flex flex-col gap-1 max-w-sm">
-          <span className="text-sm text-muted">
+        <label className="flex max-w-sm flex-col gap-1">
+          <span className="text-muted text-sm">
             This JD didn&apos;t name a company — what should we call it?
           </span>
           <input
             name="company"
             required
             placeholder="Company"
-            className="border border-line-strong rounded-[var(--radius)] px-3 py-2 bg-transparent"
+            className="border-line-strong rounded-[var(--radius)] border bg-transparent px-3 py-2"
           />
         </label>
       )}
 
       {position === null && (
-        <label className="flex flex-col gap-1 max-w-sm">
-          <span className="text-sm text-muted">
+        <label className="flex max-w-sm flex-col gap-1">
+          <span className="text-muted text-sm">
             No job title found — add one if you like.
           </span>
           <input
             name="position"
             placeholder="Position (optional)"
-            className="border border-line-strong rounded-[var(--radius)] px-3 py-2 bg-transparent"
+            className="border-line-strong rounded-[var(--radius)] border bg-transparent px-3 py-2"
           />
         </label>
       )}
@@ -55,7 +55,7 @@ export function SaveToPipeline({
         <button
           type="submit"
           disabled={isSaving}
-          className="border border-line-strong rounded-[var(--radius)] px-4 py-2 w-fit disabled:opacity-50"
+          className="border-line-strong w-fit rounded-[var(--radius)] border px-4 py-2 disabled:opacity-50"
         >
           {isSaving ? "Saving…" : "Save to applications"}
         </button>

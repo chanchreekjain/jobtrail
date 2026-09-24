@@ -18,7 +18,12 @@ export async function analyseJd(_prev: JdState, formData: FormData): Promise<JdS
 
   const rawJd = String(formData.get("raw_jd") ?? "").trim();
   if (!rawJd) {
-    return { job: null, error: "Paste a job description first.", cached: false, match: null };
+    return {
+      job: null,
+      error: "Paste a job description first.",
+      cached: false,
+      match: null,
+    };
   }
 
   const hash = hashJd(rawJd);

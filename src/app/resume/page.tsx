@@ -23,7 +23,7 @@ export default async function ResumePage() {
         </div>
       ) : (
         <div className="mt-8 space-y-6">
-          <p className="text-sm text-muted">
+          <p className="text-muted text-sm">
             From <span className="text-text">{resume.fileName}</span>, uploaded{" "}
             {new Date(resume.createdAt).toLocaleDateString()}. Check it — if
             something&apos;s wrong here, the match scores will be wrong too.
@@ -32,13 +32,14 @@ export default async function ResumePage() {
           <Card className="p-5">
             {resume.headline && <p className="text-lg">{resume.headline}</p>}
             {resume.yearsExperience != null && (
-              <p className="mt-1 text-sm text-muted">
-                About <span className="tabular text-text">{resume.yearsExperience}</span>{" "}
+              <p className="text-muted mt-1 text-sm">
+                About{" "}
+                <span className="tabular text-text">{resume.yearsExperience}</span>{" "}
                 years of experience
               </p>
             )}
 
-            <h2 className="mt-5 text-xs uppercase tracking-wide text-muted">
+            <h2 className="text-muted mt-5 text-xs tracking-wide uppercase">
               Skills ({resume.skills.length})
             </h2>
             <div className="mt-2 flex flex-wrap gap-1.5">
@@ -50,7 +51,7 @@ export default async function ResumePage() {
 
           {resume.experience.length > 0 && (
             <Card className="p-5">
-              <h2 className="text-xs uppercase tracking-wide text-muted">Experience</h2>
+              <h2 className="text-muted text-xs tracking-wide uppercase">Experience</h2>
               <ul className="mt-3 space-y-4">
                 {resume.experience.map((r, i) => (
                   <li key={i}>
@@ -59,13 +60,15 @@ export default async function ResumePage() {
                       {r.company ? ` — ${r.company}` : ""}
                     </p>
                     {(r.start || r.end) && (
-                      <p className="text-sm text-muted tabular">
+                      <p className="text-muted tabular text-sm">
                         {r.start ?? "?"} – {r.end ?? "?"}
                       </p>
                     )}
                     {r.highlights.length > 0 && (
-                      <ul className="mt-1 ml-5 list-disc text-sm text-muted">
-                        {r.highlights.map((h, j) => <li key={j}>{h}</li>)}
+                      <ul className="text-muted mt-1 ml-5 list-disc text-sm">
+                        {r.highlights.map((h, j) => (
+                          <li key={j}>{h}</li>
+                        ))}
                       </ul>
                     )}
                   </li>
@@ -76,7 +79,7 @@ export default async function ResumePage() {
 
           {resume.education.length > 0 && (
             <Card className="p-5">
-              <h2 className="text-xs uppercase tracking-wide text-muted">Education</h2>
+              <h2 className="text-muted text-xs tracking-wide uppercase">Education</h2>
               <ul className="mt-3 space-y-1 text-sm">
                 {resume.education.map((e, i) => (
                   <li key={i}>
