@@ -91,6 +91,16 @@ export default function PrivacyPage() {
         </section>
 
         <section>
+          <h2 className="mb-2 text-base font-medium">If you add your own API key</h2>
+          <p className="text-muted">
+            It&apos;s encrypted before being stored, and used only for requests you
+            trigger. It is not secret from this app — the server decrypts it to call
+            Google on your behalf. Remove it in Settings at any time, or revoke it in
+            Google AI Studio.
+          </p>
+        </section>
+
+        <section>
           <h2 className="mb-2 text-base font-medium">Cookies</h2>
           <p className="text-muted">
             Two: one that keeps you signed in, and one that remembers whether you chose

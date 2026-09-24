@@ -5,6 +5,7 @@ import { requireUser } from "@/lib/auth/current-user";
 import { extractResume } from "@/lib/ai/provider";
 import { saveResume, deleteResume } from "./repo";
 import { hasAiBudget, recordAiCall } from "@/lib/usage";
+import { getGeminiKey } from "@/features/account/keys";
 
 export type UploadState = { message: string | null; ok: boolean };
 
@@ -44,7 +45,10 @@ export async function uploadResume(
   }
 
   try {
-    const resume = await extractResume(bytes.toString("base64"));
+    const resume = await extractResume(
+      bytes.toString("base64"),
+      await getGeminiKey(user.id),
+    );
     if (resume.skills.length === 0 && resume.experience.length === 0) {
       return {
         message:

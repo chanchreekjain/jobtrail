@@ -1,5 +1,6 @@
 import { sql } from "@/lib/db/client";
 import { currentPlan } from "@/lib/plans";
+import { getGeminiKey } from "@/features/account/keys";
 
 export type UsageKind = "extract" | "match" | "resume" | "intel";
 
@@ -18,7 +19,12 @@ export async function aiCallsToday(userId: string): Promise<number> {
   return rows[0].n as number;
 }
 
+/**
+ * The daily cap exists to share the app's key fairly. Someone using
+ * their own key spends their own quota, so the cap doesn't apply.
+ */
 export async function hasAiBudget(userId: string): Promise<boolean> {
+  if (await getGeminiKey(userId)) return true;
   return (await aiCallsToday(userId)) < currentPlan().aiCallsPerDay;
 }
 

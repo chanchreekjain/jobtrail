@@ -3,6 +3,7 @@ import { findCurrentResume } from "@/features/resume/repo";
 import { findJobForMatch, findMatch, saveMatch } from "./repo";
 import { summarise } from "./score";
 import { hasAiBudget, recordAiCall } from "@/lib/usage";
+import { getGeminiKey } from "@/features/account/keys";
 import type { Match, RequirementResult } from "./types";
 
 export type MatchOutcome =
@@ -42,6 +43,7 @@ export async function matchJob(
     raw = await matchRequirements(
       job.requirements.map((r, i) => ({ n: i + 1, text: r.text, skill: r.skill })),
       resume,
+      await getGeminiKey(userId),
     );
   } catch (error) {
     const status = (error as { status?: number }).status;

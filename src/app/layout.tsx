@@ -4,6 +4,8 @@ import "./globals.css";
 import { cookies } from "next/headers";
 import { Nav } from "@/components/nav";
 import { Footer } from "@/components/footer";
+import { CookieBanner } from "@/components/cookie-banner";
+import { CONSENT_COOKIE, parseConsent } from "@/features/account/cookie-consent";
 import { THEME_COOKIE, parseTheme } from "@/features/account/theme";
 
 const geistSans = Geist({
@@ -22,7 +24,9 @@ export const metadata: Metadata = {
 };
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
-  const theme = parseTheme((await cookies()).get(THEME_COOKIE)?.value);
+  const jar = await cookies();
+  const theme = parseTheme(jar.get(THEME_COOKIE)?.value);
+  const consent = parseConsent(jar.get(CONSENT_COOKIE)?.value);
 
   return (
     <html
@@ -35,6 +39,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         <Nav />
         {children}
         <Footer />
+        {consent === null && <CookieBanner />}
       </body>
     </html>
   );

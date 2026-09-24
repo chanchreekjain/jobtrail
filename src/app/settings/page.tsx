@@ -9,6 +9,10 @@ import { Card, Page } from "@/components/ui";
 import { DeleteButton } from "@/components/delete-button";
 import { deleteAccount } from "@/features/account/actions";
 import { aiCallsToday } from "@/lib/usage";
+import { getKeyStatus } from "@/features/account/keys";
+import { ApiKeyForm } from "@/features/account/ui/api-key-form";
+import { removeApiKey } from "@/features/account/actions";
+import { formatDay } from "@/lib/dates";
 import { THEME_COOKIE, THEMES, parseTheme, type Theme } from "@/features/account/theme";
 
 const THEME_LABEL: Record<Theme, string> = {
@@ -23,6 +27,7 @@ export default async function SettingsPage() {
   const plan = currentPlan();
   const lookupsUsed = await countLookupsThisWeek(user.id);
   const aiUsed = await aiCallsToday(user.id);
+  const key = await getKeyStatus(user.id);
   const googleName = (await auth())?.user?.name ?? null;
 
   return (
@@ -36,7 +41,7 @@ export default async function SettingsPage() {
             name/value pair, so no JavaScript is needed. */}
           <form
             action={setTheme}
-            className="flex gap-2"
+            className="flex flex-wrap gap-2"
             role="radiogroup"
             aria-label="Theme"
           >
@@ -80,6 +85,46 @@ export default async function SettingsPage() {
             </ul>
             <p className="text-muted pt-2">Paid plans aren&apos;t available yet.</p>
           </div>
+        </Card>
+
+        <Card className="p-5">
+          <h2 className="font-medium">Your own Gemini key</h2>
+          <p className="text-muted mt-1 mb-4 text-sm">
+            Optional. With your own key, requests run on your Google quota instead of
+            the shared one, and the daily limit above doesn&apos;t apply to you. Get one
+            free at{" "}
+            <a
+              href="https://aistudio.google.com/apikey"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-accent hover:underline"
+            >
+              Google AI Studio
+            </a>
+            .
+          </p>
+
+          {key ? (
+            <div className="space-y-3 text-sm">
+              <p>
+                Key ending <span className="tabular">…{key.last4}</span>, added{" "}
+                {formatDay(key.setAt)}.
+              </p>
+              <DeleteButton
+                label="Remove key"
+                confirm="Requests go back to the shared key and daily limit."
+                onDelete={removeApiKey}
+              />
+            </div>
+          ) : (
+            <ApiKeyForm />
+          )}
+
+          <p className="text-faint mt-4 text-xs">
+            Your key is encrypted before it&apos;s stored and is only used for your own
+            requests. We can decrypt it to make those requests, so it isn&apos;t secret
+            from this app — revoke it any time in Google AI Studio.
+          </p>
         </Card>
 
         <Card className="border-negative/40 p-5">

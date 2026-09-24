@@ -4,8 +4,10 @@ import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { signOut } from "@/auth";
 import { requireUser } from "@/lib/auth/current-user";
+import { clearGeminiKey, saveGeminiKey } from "./keys";
 import { sql } from "@/lib/db/client";
 import { THEMES, THEME_COOKIE, type Theme } from "./theme";
+import { CONSENT_COOKIE, type Consent } from "./cookie-consent";
 
 /**
  * The theme lives in a cookie, not the database. It's a per-device choice
@@ -72,4 +74,41 @@ export async function deleteAccount(): Promise<void> {
   const user = await requireUser();
   await sql`delete from users where id = ${user.id}`;
   await signOut({ redirectTo: "/login" });
+}
+
+export type KeyState = { message: string | null; ok: boolean };
+
+/**
+ * Stores a user's own Gemini key, encrypted. Never logged, never sent
+ * back to the browser — Settings only ever shows its last four characters.
+ */
+export async function saveApiKey(
+  _prev: KeyState,
+  formData: FormData,
+): Promise<KeyState> {
+  const user = await requireUser();
+  const key = String(formData.get("api_key") ?? "").trim();
+
+  if (key.length < 20 || /\s/.test(key)) {
+    return { message: "That doesn't look like an API key.", ok: false };
+  }
+
+  await saveGeminiKey(user.id, key);
+  revalidatePath("/settings");
+  return { message: "Key saved. Your requests now use it.", ok: true };
+}
+
+export async function removeApiKey(): Promise<void> {
+  const user = await requireUser();
+  await clearGeminiKey(user.id);
+  revalidatePath("/settings");
+}
+
+/** Records the cookie choice for a year. Essential cookies are unaffected. */
+export async function setCookieChoice(choice: Consent) {
+  (await cookies()).set(CONSENT_COOKIE, choice, {
+    path: "/",
+    maxAge: 60 * 60 * 24 * 365,
+    sameSite: "lax",
+  });
 }

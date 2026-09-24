@@ -13,7 +13,7 @@ export async function Nav() {
 
   return (
     <header className="border-line bg-bg/85 sticky top-0 z-20 border-b backdrop-blur">
-      <div className="mx-auto flex h-14 w-full max-w-5xl items-center gap-6 px-6 sm:px-8">
+      <div className="mx-auto flex w-full max-w-5xl flex-wrap items-center gap-x-6 gap-y-2 px-4 py-2.5 sm:h-14 sm:flex-nowrap sm:px-8 sm:py-0">
         <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight">
           {/* The mark itself, background and grid stripped out. */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -27,7 +27,11 @@ export async function Nav() {
           jobtrail
         </Link>
 
-        {user?.email && <NavLinks />}
+        {user?.email && (
+          <div className="order-last w-full overflow-x-auto sm:order-none sm:w-auto sm:overflow-visible">
+            <NavLinks />
+          </div>
+        )}
 
         <div className="ml-auto flex items-center gap-3 text-sm">
           {user?.email ? (

@@ -21,7 +21,15 @@ if (!process.env.GEMINI_API_KEY) {
   throw new Error("GEMINI_API_KEY is not set");
 }
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+const appClient = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+
+/**
+ * The app's key, or the user's own when they've added one. Their key
+ * means their quota, which is why bringing one lifts the daily cap.
+ */
+function client(apiKey?: string | null) {
+  return apiKey ? new GoogleGenAI({ apiKey }) : appClient;
+}
 
 /**
  * Models to try, in order. When the first is overloaded (503) or
@@ -37,9 +45,10 @@ const MODELS = [
   "gemini-3.1-flash-lite",
 ];
 
-type Request = Omit<Parameters<typeof ai.models.generateContent>[0], "model">;
+type Request = Omit<Parameters<typeof appClient.models.generateContent>[0], "model">;
 
-async function generate(request: Request) {
+async function generate(request: Request, apiKey?: string | null) {
+  const ai = client(apiKey);
   let lastError: unknown;
 
   for (const model of MODELS) {
@@ -111,9 +120,13 @@ function text(value: unknown): string | null {
   return typeof value === "string" && value.trim() ? value.trim() : null;
 }
 
-export async function extractJob(rawJd: string): Promise<ExtractedJob> {
-  const response = await generate({
-    contents: `Extract structured data from this job description.
+export async function extractJob(
+  rawJd: string,
+  apiKey?: string | null,
+): Promise<ExtractedJob> {
+  const response = await generate(
+    {
+      contents: `Extract structured data from this job description.
 
 company  — the hiring company's name.
 position — the job title as written.
@@ -139,58 +152,64 @@ infer, or fill in a plausible value.
 
 JOB DESCRIPTION:
 ${rawJd}`,
-    config: {
-      responseMimeType: "application/json",
-      responseSchema: {
-        type: Type.OBJECT,
-        properties: {
-          company: { type: Type.STRING, nullable: true },
-          position: { type: Type.STRING, nullable: true },
-          deadline: { type: Type.STRING, nullable: true },
-          location: { type: Type.STRING, nullable: true },
-          workMode: { type: Type.STRING, enum: WORK_MODES, nullable: true },
-          employmentType: { type: Type.STRING, enum: EMPLOYMENT_TYPES, nullable: true },
-          experienceMin: { type: Type.INTEGER, nullable: true },
-          salaryRaw: { type: Type.STRING, nullable: true },
-          salaryMin: { type: Type.NUMBER, nullable: true },
-          salaryMax: { type: Type.NUMBER, nullable: true },
-          salaryCurrency: { type: Type.STRING, nullable: true },
-          salaryPeriod: { type: Type.STRING, enum: SALARY_PERIODS, nullable: true },
-          contactEmail: { type: Type.STRING, nullable: true },
-          notes: { type: Type.STRING, nullable: true },
-          requirements: {
-            type: Type.ARRAY,
-            items: {
-              type: Type.OBJECT,
-              properties: {
-                text: { type: Type.STRING },
-                kind: { type: Type.STRING, enum: ["must", "nice"] },
-                skill: { type: Type.STRING },
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            company: { type: Type.STRING, nullable: true },
+            position: { type: Type.STRING, nullable: true },
+            deadline: { type: Type.STRING, nullable: true },
+            location: { type: Type.STRING, nullable: true },
+            workMode: { type: Type.STRING, enum: WORK_MODES, nullable: true },
+            employmentType: {
+              type: Type.STRING,
+              enum: EMPLOYMENT_TYPES,
+              nullable: true,
+            },
+            experienceMin: { type: Type.INTEGER, nullable: true },
+            salaryRaw: { type: Type.STRING, nullable: true },
+            salaryMin: { type: Type.NUMBER, nullable: true },
+            salaryMax: { type: Type.NUMBER, nullable: true },
+            salaryCurrency: { type: Type.STRING, nullable: true },
+            salaryPeriod: { type: Type.STRING, enum: SALARY_PERIODS, nullable: true },
+            contactEmail: { type: Type.STRING, nullable: true },
+            notes: { type: Type.STRING, nullable: true },
+            requirements: {
+              type: Type.ARRAY,
+              items: {
+                type: Type.OBJECT,
+                properties: {
+                  text: { type: Type.STRING },
+                  kind: { type: Type.STRING, enum: ["must", "nice"] },
+                  skill: { type: Type.STRING },
+                },
+                required: ["text", "kind", "skill"],
               },
-              required: ["text", "kind", "skill"],
             },
           },
+          required: [
+            "company",
+            "position",
+            "deadline",
+            "location",
+            "workMode",
+            "employmentType",
+            "experienceMin",
+            "salaryRaw",
+            "salaryMin",
+            "salaryMax",
+            "salaryCurrency",
+            "salaryPeriod",
+            "contactEmail",
+            "notes",
+            "requirements",
+          ],
         },
-        required: [
-          "company",
-          "position",
-          "deadline",
-          "location",
-          "workMode",
-          "employmentType",
-          "experienceMin",
-          "salaryRaw",
-          "salaryMin",
-          "salaryMax",
-          "salaryCurrency",
-          "salaryPeriod",
-          "contactEmail",
-          "notes",
-          "requirements",
-        ],
       },
     },
-  });
+    apiKey,
+  );
 
   const raw = JSON.parse(response.text ?? "{}") as Record<string, unknown>;
 
@@ -252,13 +271,15 @@ export type CompanySummary = {
 export async function summariseCompany(
   companyName: string,
   sources: NumberedSource[],
+  apiKey?: string | null,
 ): Promise<CompanySummary> {
   const numbered = sources
     .map((s) => `[${s.n}] ${s.title}\n${s.url}\n${s.content}`)
     .join("\n\n");
 
-  const response = await generate({
-    contents: `You are researching the company "${companyName}" for a job applicant.
+  const response = await generate(
+    {
+      contents: `You are researching the company "${companyName}" for a job applicant.
 Use ONLY the numbered sources below. Do not use anything you already know.
 
 companyName — the company's name spelled exactly as the sources write it
@@ -280,37 +301,39 @@ an empty facts list and say so in the summary.
 
 SOURCES:
 ${numbered}`,
-    config: {
-      responseMimeType: "application/json",
-      responseSchema: {
-        type: Type.OBJECT,
-        properties: {
-          companyName: { type: Type.STRING },
-          summary: { type: Type.STRING },
-          facts: {
-            type: Type.ARRAY,
-            items: {
-              type: Type.OBJECT,
-              properties: {
-                claim: { type: Type.STRING },
-                source: { type: Type.INTEGER },
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            companyName: { type: Type.STRING },
+            summary: { type: Type.STRING },
+            facts: {
+              type: Type.ARRAY,
+              items: {
+                type: Type.OBJECT,
+                properties: {
+                  claim: { type: Type.STRING },
+                  source: { type: Type.INTEGER },
+                },
+                required: ["claim", "source"],
               },
-              required: ["claim", "source"],
             },
+            careersSource: { type: Type.INTEGER, nullable: true },
+            recruitingContact: { type: Type.STRING, nullable: true },
           },
-          careersSource: { type: Type.INTEGER, nullable: true },
-          recruitingContact: { type: Type.STRING, nullable: true },
+          required: [
+            "companyName",
+            "summary",
+            "facts",
+            "careersSource",
+            "recruitingContact",
+          ],
         },
-        required: [
-          "companyName",
-          "summary",
-          "facts",
-          "careersSource",
-          "recruitingContact",
-        ],
       },
     },
-  });
+    apiKey,
+  );
 
   return JSON.parse(response.text ?? "{}") as CompanySummary;
 }
@@ -343,14 +366,18 @@ export type ExtractedResume = {
  * Reads a resume PDF directly — Gemini accepts the file itself, so there's
  * no separate PDF-to-text step to go wrong on columns or tables.
  */
-export async function extractResume(pdfBase64: string): Promise<ExtractedResume> {
-  const response = await generate({
-    contents: [
-      {
-        role: "user",
-        parts: [
-          {
-            text: `Extract structured data from this resume.
+export async function extractResume(
+  pdfBase64: string,
+  apiKey?: string | null,
+): Promise<ExtractedResume> {
+  const response = await generate(
+    {
+      contents: [
+        {
+          role: "user",
+          parts: [
+            {
+              text: `Extract structured data from this resume.
 
 body — the resume's full text as plain text, in the order it appears,
   including project and achievement lines. Leave out email addresses,
@@ -369,58 +396,60 @@ education — each qualification: the degree or course, institution, year.
 
 Do not include contact details, addresses or phone numbers. If something
 isn't in the resume, return null or an empty list. Do not guess.`,
-          },
-          { inlineData: { mimeType: "application/pdf", data: pdfBase64 } },
-        ],
-      },
-    ],
-    config: {
-      responseMimeType: "application/json",
-      responseSchema: {
-        type: Type.OBJECT,
-        properties: {
-          body: { type: Type.STRING },
-          headline: { type: Type.STRING, nullable: true },
-          skills: { type: Type.ARRAY, items: { type: Type.STRING } },
-          yearsExperience: { type: Type.NUMBER, nullable: true },
-          experience: {
-            type: Type.ARRAY,
-            items: {
-              type: Type.OBJECT,
-              properties: {
-                title: { type: Type.STRING },
-                company: { type: Type.STRING, nullable: true },
-                start: { type: Type.STRING, nullable: true },
-                end: { type: Type.STRING, nullable: true },
-                highlights: { type: Type.ARRAY, items: { type: Type.STRING } },
-              },
-              required: ["title", "company", "start", "end", "highlights"],
             },
-          },
-          education: {
-            type: Type.ARRAY,
-            items: {
-              type: Type.OBJECT,
-              properties: {
-                qualification: { type: Type.STRING },
-                institution: { type: Type.STRING, nullable: true },
-                year: { type: Type.STRING, nullable: true },
-              },
-              required: ["qualification", "institution", "year"],
-            },
-          },
+            { inlineData: { mimeType: "application/pdf", data: pdfBase64 } },
+          ],
         },
-        required: [
-          "body",
-          "headline",
-          "skills",
-          "yearsExperience",
-          "experience",
-          "education",
-        ],
+      ],
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            body: { type: Type.STRING },
+            headline: { type: Type.STRING, nullable: true },
+            skills: { type: Type.ARRAY, items: { type: Type.STRING } },
+            yearsExperience: { type: Type.NUMBER, nullable: true },
+            experience: {
+              type: Type.ARRAY,
+              items: {
+                type: Type.OBJECT,
+                properties: {
+                  title: { type: Type.STRING },
+                  company: { type: Type.STRING, nullable: true },
+                  start: { type: Type.STRING, nullable: true },
+                  end: { type: Type.STRING, nullable: true },
+                  highlights: { type: Type.ARRAY, items: { type: Type.STRING } },
+                },
+                required: ["title", "company", "start", "end", "highlights"],
+              },
+            },
+            education: {
+              type: Type.ARRAY,
+              items: {
+                type: Type.OBJECT,
+                properties: {
+                  qualification: { type: Type.STRING },
+                  institution: { type: Type.STRING, nullable: true },
+                  year: { type: Type.STRING, nullable: true },
+                },
+                required: ["qualification", "institution", "year"],
+              },
+            },
+          },
+          required: [
+            "body",
+            "headline",
+            "skills",
+            "yearsExperience",
+            "experience",
+            "education",
+          ],
+        },
       },
     },
-  });
+    apiKey,
+  );
 
   const raw = JSON.parse(response.text ?? "{}") as Record<string, unknown>;
 
@@ -501,13 +530,15 @@ export function resumeAsText(resume: ResumeForMatch): string {
 export async function matchRequirements(
   requirements: RequirementToMatch[],
   resume: ResumeForMatch,
+  apiKey?: string | null,
 ): Promise<RawMatch[]> {
   const reqList = requirements
     .map((r) => `[${r.n}] ${r.text} (skill: ${r.skill})`)
     .join("\n");
 
-  const response = await generate({
-    contents: `Decide, for each numbered job requirement, whether this candidate's
+  const response = await generate(
+    {
+      contents: `Decide, for each numbered job requirement, whether this candidate's
 resume shows it.
 
 verdict:
@@ -545,22 +576,24 @@ ${reqList}
 
 RESUME:
 ${resumeAsText(resume)}`,
-    config: {
-      responseMimeType: "application/json",
-      responseSchema: {
-        type: Type.ARRAY,
-        items: {
-          type: Type.OBJECT,
-          properties: {
-            n: { type: Type.INTEGER },
-            verdict: { type: Type.STRING, enum: ["met", "missing", "unclear"] },
-            evidence: { type: Type.ARRAY, items: { type: Type.STRING } },
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.ARRAY,
+          items: {
+            type: Type.OBJECT,
+            properties: {
+              n: { type: Type.INTEGER },
+              verdict: { type: Type.STRING, enum: ["met", "missing", "unclear"] },
+              evidence: { type: Type.ARRAY, items: { type: Type.STRING } },
+            },
+            required: ["n", "verdict", "evidence"],
           },
-          required: ["n", "verdict", "evidence"],
         },
       },
     },
-  });
+    apiKey,
+  );
 
   const raw = JSON.parse(response.text ?? "[]");
   return Array.isArray(raw) ? (raw as RawMatch[]) : [];

@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import { hashJd, findJobByHash, saveJob, deleteJob, type SavedJob } from "./repo";
 import { matchJob, type MatchOutcome } from "@/features/match/service";
 import { hasAiBudget, recordAiCall } from "@/lib/usage";
+import { getGeminiKey } from "@/features/account/keys";
 
 export type JdState = {
   job: SavedJob | null;
@@ -52,7 +53,7 @@ export async function analyseJd(_prev: JdState, formData: FormData): Promise<JdS
   }
 
   try {
-    const job = await extractJob(rawJd);
+    const job = await extractJob(rawJd, await getGeminiKey(user.id));
     const id = await saveJob(user.id, rawJd, hash, job);
     await recordAiCall(user.id, "extract");
     return {

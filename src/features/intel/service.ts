@@ -2,6 +2,7 @@ import { searchWeb } from "@/lib/search/tavily";
 import { summariseCompany, type NumberedSource } from "@/lib/ai/provider";
 import { currentPlan } from "@/lib/plans";
 import { hasAiBudget, recordAiCall } from "@/lib/usage";
+import { getGeminiKey } from "@/features/account/keys";
 import {
   companyKey,
   findFreshIntel,
@@ -80,7 +81,7 @@ export async function researchCompany(
   let data: IntelData;
   let canonical = name;
   try {
-    const raw = await summariseCompany(name, sources);
+    const raw = await summariseCompany(name, sources, await getGeminiKey(userId));
     data = validate(raw, sources);
     // Trust the model's spelling only when it found real, sourced facts —
     // otherwise it may be naming some other company the search turned up.
