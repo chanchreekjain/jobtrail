@@ -29,7 +29,7 @@ export async function setTheme(formData: FormData) {
 }
 
 export async function signOutAction() {
-  await signOut({ redirectTo: "/login" });
+  await signOut({ redirectTo: "/" });
 }
 
 export type ProfileState = { message: string | null; ok: boolean };
@@ -73,7 +73,7 @@ export async function updateDisplayName(
 export async function deleteAccount(): Promise<void> {
   const user = await requireUser();
   await sql`delete from users where id = ${user.id}`;
-  await signOut({ redirectTo: "/login" });
+  await signOut({ redirectTo: "/" });
 }
 
 export type KeyState = { message: string | null; ok: boolean };

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { ButtonLink, Card } from "@/components/ui";
+import { Logo } from "@/components/logo";
 
 /**
  * The signed-out home page: what the app does, shown rather than claimed.
@@ -56,7 +57,7 @@ function Preview() {
       </p>
 
       <div className="grid gap-4 lg:grid-cols-[1fr_1.1fr]">
-        <Card className="p-5">
+        <Card className="p-5 shadow-sm">
           <div className="grid grid-cols-2 gap-4">
             {[
               ["JDs analysed", "12"],
@@ -136,7 +137,8 @@ function HowItWorks() {
   return (
     <section id="how" className="border-line bg-surface-2 scroll-mt-20 border-y">
       <div className="mx-auto w-full max-w-5xl px-6 py-14 sm:px-8">
-        <h2 className="text-2xl font-semibold">How it works</h2>
+        <p className="text-accent text-xs tracking-wide uppercase">Three steps</p>
+        <h2 className="mt-2 text-3xl font-semibold tracking-tight">How it works</h2>
         <div className="mt-8 grid gap-4 sm:grid-cols-3">
           {steps.map((step, i) => (
             <div key={step.title}>
@@ -192,11 +194,17 @@ function Features() {
       id="features"
       className="mx-auto w-full max-w-5xl scroll-mt-20 px-6 py-14 sm:px-8"
     >
-      <h2 className="text-2xl font-semibold">What you get</h2>
+      <p className="text-accent text-xs tracking-wide uppercase">Features</p>
+      <h2 className="mt-2 text-3xl font-semibold tracking-tight">What you get</h2>
       <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {features.map((f) => (
-          <Card key={f.title} className="p-5">
-            <span className="text-accent">{f.icon}</span>
+          <Card
+            key={f.title}
+            className="hover:border-line-strong p-5 transition-colors"
+          >
+            <span className="bg-accent-soft text-accent flex h-9 w-9 items-center justify-center rounded-[var(--radius)]">
+              {f.icon}
+            </span>
             <p className="mt-3 font-medium">{f.title}</p>
             <p className="text-muted mt-1 text-sm">{f.body}</p>
           </Card>
@@ -211,7 +219,10 @@ function Trust() {
     <section className="border-line bg-surface-2 border-y">
       <div className="mx-auto grid w-full max-w-5xl gap-8 px-6 py-14 sm:px-8 lg:grid-cols-3">
         <div>
-          <h2 className="text-2xl font-semibold">Honest by design</h2>
+          <p className="text-accent text-xs tracking-wide uppercase">Why trust it</p>
+          <h2 className="mt-2 text-3xl font-semibold tracking-tight">
+            Honest by design
+          </h2>
           <p className="text-muted mt-2 text-sm">
             An AI that guesses confidently is worse than no AI. jobtrail is built so it
             can&apos;t.
@@ -243,16 +254,20 @@ function Trust() {
 
 function ClosingCta() {
   return (
-    <section className="mx-auto w-full max-w-5xl px-6 py-16 text-center sm:px-8">
-      <h2 className="text-2xl font-semibold">Start with one job description</h2>
-      <p className="text-muted mx-auto mt-2 max-w-xl">
-        Paste the next posting you were going to apply to, and see what it actually asks
-        for.
-      </p>
-      <div className="mt-6 flex justify-center">
-        <ButtonLink href="/login" variant="primary">
-          Sign in to continue
-        </ButtonLink>
+    <section className="border-line bg-surface-2 border-t">
+      <div className="mx-auto w-full max-w-5xl px-6 py-16 text-center sm:px-8">
+        <h2 className="text-3xl font-semibold tracking-tight">
+          Start with one job description
+        </h2>
+        <p className="text-muted mx-auto mt-2 max-w-xl">
+          Paste the next posting you were going to apply to, and see what it actually
+          asks for.
+        </p>
+        <div className="mt-6 flex justify-center">
+          <ButtonLink href="/login" variant="primary">
+            Sign in to continue
+          </ButtonLink>
+        </div>
       </div>
     </section>
   );
