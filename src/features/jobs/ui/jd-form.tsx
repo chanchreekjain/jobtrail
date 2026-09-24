@@ -51,7 +51,22 @@ export function JdForm({
       </form>
 
       {isPending && (
-        <Working label="Reading the JD, then scoring it against your resume" />
+        <Working
+          label="Reading the JD"
+          stages={[
+            {
+              after: 0,
+              message:
+                "Two steps: pulling out the requirements, then scoring them against your resume.",
+            },
+            { after: 20, message: "Requirements done — scoring now." },
+            {
+              after: 45,
+              message:
+                "Taking a while. We try four models before giving up, so hold on.",
+            },
+          ]}
+        />
       )}
 
       {state.error && <p className="text-negative">{state.error}</p>}

@@ -59,7 +59,16 @@ export function ResearchPanel({ initialCompany }: { initialCompany: string }) {
 
       {isPending && (
         <div className="mb-6">
-          <Working label="Searching the web and checking sources" />
+          <Working
+            label="Researching"
+            stages={[
+              {
+                after: 0,
+                message: "Searching the web, then checking every claim has a source.",
+              },
+              { after: 25, message: "Still going — this one is slower than usual." },
+            ]}
+          />
         </div>
       )}
 

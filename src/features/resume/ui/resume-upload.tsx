@@ -66,7 +66,23 @@ export function ResumeUpload({ hasResume }: { hasResume: boolean }) {
         resume can take a minute — keep this page open.
       </p>
 
-      {isPending && <Working label="Reading your resume — this can take a minute" />}
+      {isPending && (
+        <Working
+          label="Reading your resume"
+          stages={[
+            {
+              after: 0,
+              message: "Usually 20–60 seconds. Keep this page open.",
+            },
+            { after: 30, message: "Still going — longer resumes take more reading." },
+            {
+              after: 60,
+              message:
+                "Taking a while. Google's models are busy some days; we keep trying.",
+            },
+          ]}
+        />
+      )}
       {state.message && !isPending && (
         <p className={`text-sm ${state.ok ? "text-positive" : "text-negative"}`}>
           {state.message}
