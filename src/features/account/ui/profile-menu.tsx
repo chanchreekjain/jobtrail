@@ -41,7 +41,7 @@ export function ProfileMenu({ name, email, image }: Props) {
         aria-haspopup="menu"
         aria-expanded={open}
         aria-label="Account menu"
-        className="h-9 w-9 rounded-full overflow-hidden border border-gray-300 flex items-center justify-center font-semibold"
+        className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full border border-line bg-surface-2 text-xs font-semibold"
       >
         {image ? (
           // A plain <img>: next/image would need Google's image host added
@@ -57,17 +57,17 @@ export function ProfileMenu({ name, email, image }: Props) {
       {open && (
         <div
           role="menu"
-          className="absolute right-0 mt-2 w-60 rounded border border-gray-300 bg-background shadow-lg z-10 text-sm"
+          className="absolute right-0 z-20 mt-2 w-60 overflow-hidden rounded-[var(--radius)] border border-line bg-surface text-sm shadow-lg"
         >
-          <div className="px-4 py-3 border-b border-gray-300">
+          <div className="border-b border-line px-4 py-3">
             {name && <p className="font-medium truncate">{name}</p>}
-            <p className="text-gray-500 truncate">{email}</p>
+            <p className="truncate text-muted">{email}</p>
           </div>
           <Link
             href="/settings"
             role="menuitem"
             onClick={() => setOpen(false)}
-            className="block px-4 py-2 hover:bg-gray-500/10"
+            className="block px-4 py-2 hover:bg-surface-2"
           >
             Settings
           </Link>
@@ -75,7 +75,7 @@ export function ProfileMenu({ name, email, image }: Props) {
             <button
               type="submit"
               role="menuitem"
-              className="w-full text-left px-4 py-2 hover:bg-gray-500/10 border-t border-gray-300"
+              className="w-full border-t border-line px-4 py-2 text-left hover:bg-surface-2"
             >
               Sign out
             </button>

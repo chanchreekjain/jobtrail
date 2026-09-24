@@ -1,44 +1,124 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
 /*
- * Theme: the layout sets data-theme="light" or "dark" on <html> when the
- * user picked one in Settings. With no attribute ("Match my device"), the
- * media query follows the operating system.
- * color-scheme makes the browser's own controls (date pickers, scrollbars)
- * match too.
+ * Design tokens. Every colour, radius and shade in the app comes from
+ * here, so the whole look can be retuned in one file instead of hunting
+ * down "gray-300" in forty components.
+ *
+ * The palette is deliberately small: a neutral scale plus one accent,
+ * and colour reserved for meaning (a state, a score) rather than
+ * decoration.
  */
 :root {
   color-scheme: light;
+
+  --bg: #fbfbfa;          /* page */
+  --surface: #ffffff;     /* cards, menus, table backgrounds */
+  --surface-2: #f4f4f2;   /* hover, subtle fills */
+  --line: #e3e3df;        /* borders, rules */
+  --line-strong: #cfcfc9; /* inputs, focus outlines */
+  --text: #1a1a18;        /* body */
+  --muted: #6f6f68;       /* labels, secondary */
+  --faint: #9b9b93;       /* placeholders, disabled */
+
+  --accent: #2f5bd8;      /* one accent, used for actions and links */
+  --accent-text: #ffffff;
+  --accent-soft: #e8edfb;
+
+  --positive: #1f7a4d;
+  --negative: #b4392f;
+  --warning: #8a6116;
+
+  --radius: 6px;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --background: #0a0a0a;
-    --foreground: #ededed;
     color-scheme: dark;
+
+    --bg: #111110;
+    --surface: #1a1a19;
+    --surface-2: #232321;
+    --line: #2e2e2b;
+    --line-strong: #3f3f3b;
+    --text: #ececea;
+    --muted: #a3a39c;
+    --faint: #76766f;
+
+    --accent: #7c9cf5;
+    --accent-text: #10131c;
+    --accent-soft: #1c2438;
+
+    --positive: #5cc08a;
+    --negative: #e8796d;
+    --warning: #d9a640;
   }
 }
 
 :root[data-theme="dark"] {
-  --background: #0a0a0a;
-  --foreground: #ededed;
   color-scheme: dark;
+
+  --bg: #111110;
+  --surface: #1a1a19;
+  --surface-2: #232321;
+  --line: #2e2e2b;
+  --line-strong: #3f3f3b;
+  --text: #ececea;
+  --muted: #a3a39c;
+  --faint: #76766f;
+
+  --accent: #7c9cf5;
+  --accent-text: #10131c;
+  --accent-soft: #1c2438;
+
+  --positive: #5cc08a;
+  --negative: #e8796d;
+  --warning: #d9a640;
+}
+
+/* Makes the tokens available as Tailwind utilities: bg-surface, text-muted… */
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-text: var(--text);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-accent: var(--accent);
+  --color-accent-text: var(--accent-text);
+  --color-accent-soft: var(--accent-soft);
+  --color-positive: var(--positive);
+  --color-negative: var(--negative);
+  --color-warning: var(--warning);
+
+  --radius-token: var(--radius);
+
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  /* Slightly tighter tracking on headings reads as considered rather than
+     shouty; the rest stays at defaults for legibility. */
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3 {
+  letter-spacing: -0.015em;
+}
+
+/* Figures line up in columns when every digit is the same width. */
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* One focus style everywhere, visible in both themes. */
+:where(a, button, input, textarea, select, [tabindex]):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }

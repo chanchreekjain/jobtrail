@@ -1,7 +1,7 @@
-import Link from "next/link";
 import { requireUser } from "@/lib/auth/current-user";
 import { findCurrentResume } from "@/features/resume/repo";
 import { getCounts } from "@/features/applications/repo";
+import { Card, Page, ButtonLink } from "@/components/ui";
 
 export default async function Home() {
   const user = await requireUser();
@@ -9,55 +9,44 @@ export default async function Home() {
   const hasResume = (await findCurrentResume(user.id)) !== null;
 
   return (
-    <main className="min-h-screen p-12 max-w-4xl">
-      <h1 className="text-4xl font-bold mb-2">jobtrail</h1>
-      <p className="text-gray-500 mb-10">
-        Track every application. Tailor every resume.
-      </p>
-
+    <Page
+      title="jobtrail"
+      description="Track every application. Know where you stand before you apply."
+      actions={
+        <>
+          <ButtonLink href="/jd" variant="primary">Paste a JD</ButtonLink>
+          <ButtonLink href="/pipeline">View pipeline</ButtonLink>
+        </>
+      }
+    >
       {!hasResume && (
-        <div className="border border-gray-300 rounded p-4 mb-8 text-sm">
-          <p className="font-medium mb-1">Upload your resume first</p>
-          <p className="text-gray-500 mb-3">
-            Every JD you paste gets scored against it, with the must-haves
-            you&apos;re missing. Without one, jobtrail still tracks
-            applications — you just won&apos;t see a score.
-          </p>
-          <Link href="/resume" className="bg-blue-600 text-white rounded px-4 py-2 inline-block">
-            Upload resume
-          </Link>
-        </div>
+        <Card className="mb-8 flex flex-wrap items-center justify-between gap-4 p-5">
+          <div>
+            <p className="font-medium">Upload your resume first</p>
+            <p className="mt-1 text-sm text-muted">
+              Every JD you paste gets scored against it, with the must-haves
+              you&apos;re missing. Without one, jobtrail still tracks
+              applications — you just won&apos;t see a score.
+            </p>
+          </div>
+          <ButtonLink href="/resume" variant="primary">Upload resume</ButtonLink>
+        </Card>
       )}
 
-      <div className="grid grid-cols-3 gap-4 mb-10">
+      <div className="grid gap-4 sm:grid-cols-3">
         <Stat label="JDs analysed" value={counts.jobs} />
         <Stat label="In pipeline" value={counts.applications} />
         <Stat label="Applied" value={counts.applied} />
       </div>
-
-      <div className="flex gap-3">
-        <Link
-          href="/jd"
-          className="bg-blue-600 text-white rounded px-4 py-2"
-        >
-          Paste a JD
-        </Link>
-        <Link
-          href="/pipeline"
-          className="border border-gray-400 rounded px-4 py-2"
-        >
-          View pipeline
-        </Link>
-      </div>
-    </main>
+    </Page>
   );
 }
 
 function Stat({ label, value }: { label: string; value: number }) {
   return (
-    <div className="border border-gray-300 rounded p-4">
-      <p className="text-3xl font-semibold">{value}</p>
-      <p className="text-sm text-gray-500">{label}</p>
-    </div>
+    <Card className="p-5">
+      <p className="tabular text-4xl font-semibold">{value}</p>
+      <p className="mt-1 text-sm text-muted">{label}</p>
+    </Card>
   );
 }

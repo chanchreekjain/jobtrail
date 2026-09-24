@@ -2,6 +2,7 @@ import Link from "next/link";
 import { auth } from "@/auth";
 import { currentUser } from "@/lib/auth/current-user";
 import { ProfileMenu } from "@/features/account/ui/profile-menu";
+import { NavLinks } from "./nav-links";
 
 export async function Nav() {
   const session = await auth();
@@ -11,26 +12,28 @@ export async function Nav() {
   const account = user?.email ? await currentUser() : null;
 
   return (
-    <nav className="border-b border-gray-300 px-12 py-4 flex gap-6 items-center">
-      <Link href="/" className="font-bold">jobtrail</Link>
-      <Link href="/pipeline" className="hover:underline">Pipeline</Link>
-      <Link href="/jd" className="hover:underline">Paste a JD</Link>
-      <Link href="/history" className="hover:underline">History</Link>
-      <Link href="/resume" className="hover:underline">Resume</Link>
+    <header className="sticky top-0 z-20 border-b border-line bg-bg/85 backdrop-blur">
+      <div className="mx-auto flex h-14 w-full max-w-5xl items-center gap-6 px-6 sm:px-8">
+        <Link href="/" className="font-semibold tracking-tight">
+          jobtrail
+        </Link>
 
-      <div className="ml-auto flex items-center gap-3 text-sm">
-        {user?.email ? (
-          <ProfileMenu
-            name={account?.name ?? user.name ?? null}
-            email={user.email}
-            image={user.image ?? null}
-          />
-        ) : (
-          <Link href="/login" className="hover:underline">
-            Sign in
-          </Link>
-        )}
+        {user?.email && <NavLinks />}
+
+        <div className="ml-auto flex items-center gap-3 text-sm">
+          {user?.email ? (
+            <ProfileMenu
+              name={account?.name ?? user.name ?? null}
+              email={user.email}
+              image={user.image ?? null}
+            />
+          ) : (
+            <Link href="/login" className="text-muted hover:text-text">
+              Sign in
+            </Link>
+          )}
+        </div>
       </div>
-    </nav>
+    </header>
   );
 }
