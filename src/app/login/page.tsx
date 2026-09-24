@@ -17,13 +17,26 @@ function safeNext(value: string | undefined): string {
   return value;
 }
 
+/** Auth.js reports what went wrong in ?error=; say it in plain words. */
+function signInMessage(error: string | undefined): string | null {
+  if (!error) return null;
+  if (error === "AccessDenied" || error === "OAuthAccountNotLinked") {
+    return "Sign-in was cancelled. Nothing happened, and you can try again.";
+  }
+  if (error === "Configuration") {
+    return "Sign-in isn't set up correctly right now. Please try again later.";
+  }
+  return "Something went wrong signing in. Try again.";
+}
+
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ next?: string }>;
+  searchParams: Promise<{ next?: string; error?: string }>;
 }) {
-  const { next } = await searchParams;
+  const { next, error } = await searchParams;
   const target = safeNext(next);
+  const message = signInMessage(error);
 
   return (
     <main className="mx-auto w-full max-w-sm px-6 py-20">
@@ -31,6 +44,12 @@ export default async function LoginPage({
       <p className="text-muted mt-2 mb-8">
         So your applications follow you across devices.
       </p>
+
+      {message && (
+        <p className="border-line bg-surface mb-6 rounded-[var(--radius)] border p-3 text-sm">
+          {message}
+        </p>
+      )}
 
       <form
         action={async () => {
