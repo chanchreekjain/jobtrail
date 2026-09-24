@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/auth/current-user";
 import { findCurrentResume } from "@/features/resume/repo";
 import { findJobForMatch } from "@/features/match/repo";
+import { findApplicationByJobId } from "@/features/applications/repo";
+import { SaveToPipeline } from "@/features/applications/ui/save-to-pipeline";
 import { matchJob } from "@/features/match/service";
 import type { RequirementResult } from "@/features/match/types";
 
@@ -21,14 +23,20 @@ export default async function MatchPage({
   if (!job) notFound();
 
   const resume = await findCurrentResume(user.id);
+  const inPipeline = (await findApplicationByJobId(user.id, jobId)) !== null;
   const outcome = await matchJob(user.id, jobId);
 
   return (
     <main className="min-h-screen p-12 max-w-3xl space-y-8">
       <div>
-        <Link href="/pipeline" className="text-sm text-gray-500 hover:underline">
-          ← Pipeline
-        </Link>
+        <div className="flex gap-4 text-sm">
+          <Link href={`/jd?job=${jobId}`} className="text-gray-500 hover:underline">
+            ← Back to this JD
+          </Link>
+          <Link href="/pipeline" className="text-gray-500 hover:underline">
+            Pipeline
+          </Link>
+        </div>
         <h1 className="text-2xl font-bold mt-2">
           {job.position ?? "Untitled role"}
           {job.company ? ` — ${job.company}` : ""}
@@ -83,6 +91,10 @@ export default async function MatchPage({
               resume undersells you.
             </p>
           </div>
+
+          {!inPipeline && (
+            <SaveToPipeline jobId={jobId} company={job.company} position={job.position} />
+          )}
 
           <Checklist title="Must-haves" items={outcome.match.results.filter((r) => r.kind === "must")} />
           <Checklist title="Nice-to-haves" items={outcome.match.results.filter((r) => r.kind === "nice")} />

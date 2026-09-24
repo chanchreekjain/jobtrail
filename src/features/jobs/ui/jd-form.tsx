@@ -2,23 +2,31 @@
 
 import { useActionState } from "react";
 import { analyseJd, type JdState } from "../actions";
-import {
-  saveToPipeline,
-  type PipelineState,
-} from "@/features/applications/actions";
+import type { SavedJob } from "../repo";
+import type { MatchOutcome } from "@/features/match/service";
 import { JobTable } from "./job-table";
 import { MatchResult } from "@/features/match/ui/match-result";
+import { SaveToPipeline } from "@/features/applications/ui/save-to-pipeline";
 import { Working } from "@/components/working";
 
-const initialState: JdState = { job: null, error: null, cached: false, match: null };
-const initialPipelineState: PipelineState = { message: null, ok: false };
+const blankState: JdState = { job: null, error: null, cached: false, match: null };
 
-export function JdForm() {
-  const [state, formAction, isPending] = useActionState(analyseJd, initialState);
-  const [pipeline, pipelineAction, isSaving] = useActionState(
-    saveToPipeline,
-    initialPipelineState,
-  );
+export function JdForm({
+  initialJob = null,
+  initialMatch = null,
+  initialText = "",
+}: {
+  initialJob?: SavedJob | null;
+  initialMatch?: MatchOutcome | null;
+  initialText?: string;
+} = {}) {
+  // Arriving from a breakdown link, the JD is already extracted: show it
+  // as it was. Editing the text and submitting runs a fresh extraction.
+  const [state, formAction, isPending] = useActionState(analyseJd, {
+    ...blankState,
+    job: initialJob,
+    match: initialMatch,
+  });
   const job = state.job;
 
   return (
@@ -27,6 +35,7 @@ export function JdForm() {
         <textarea
           name="raw_jd"
           rows={12}
+          defaultValue={initialText}
           required
           className="border border-gray-400 rounded px-3 py-2 bg-transparent"
         />
@@ -55,55 +64,11 @@ export function JdForm() {
 
           {state.match && <MatchResult outcome={state.match} jobId={job.id} />}
 
-          <form action={pipelineAction} className="flex flex-col gap-3">
-            <input type="hidden" name="job_id" value={job.id} />
-
-            {job.company === null && (
-              <label className="flex flex-col gap-1 max-w-sm">
-                <span className="text-sm text-gray-500">
-                  This JD didn&apos;t name a company — what should we call it?
-                </span>
-                <input
-                  name="company"
-                  required
-                  placeholder="Company"
-                  className="border border-gray-400 rounded px-3 py-2 bg-transparent"
-                />
-              </label>
-            )}
-
-            {job.position === null && (
-              <label className="flex flex-col gap-1 max-w-sm">
-                <span className="text-sm text-gray-500">
-                  No job title found — add one if you like.
-                </span>
-                <input
-                  name="position"
-                  placeholder="Position (optional)"
-                  className="border border-gray-400 rounded px-3 py-2 bg-transparent"
-                />
-              </label>
-            )}
-
-            <div className="flex items-center gap-3">
-              <button
-                type="submit"
-                disabled={isSaving}
-                className="border border-gray-400 rounded px-4 py-2 w-fit disabled:opacity-50"
-              >
-                {isSaving ? "Saving…" : "Save to pipeline"}
-              </button>
-              {pipeline.message && (
-                <span
-                  className={`text-sm ${
-                    pipeline.ok ? "text-gray-500" : "text-red-500"
-                  }`}
-                >
-                  {pipeline.message}
-                </span>
-              )}
-            </div>
-          </form>
+          <SaveToPipeline
+            jobId={job.id}
+            company={job.company}
+            position={job.position}
+          />
         </div>
       )}
     </div>

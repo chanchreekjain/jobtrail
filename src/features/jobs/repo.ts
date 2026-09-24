@@ -51,6 +51,43 @@ export async function findJobByHash(
   };
 }
 
+/** One saved job by id, with the original JD text, for revisiting it. */
+export async function findJobById(
+  userId: string,
+  id: string,
+): Promise<(SavedJob & { rawJd: string }) | null> {
+  const jobs = await sql`
+    select
+      id,
+      raw_jd as "rawJd",
+      company,
+      "position",
+      to_char(deadline, 'YYYY-MM-DD') as deadline,
+      ${jobDetailColumns()}
+    from jobs
+    where id = ${id} and user_id = ${userId}
+  `;
+  if (jobs.length === 0) return null;
+
+  const job = jobs[0];
+  const rows = await sql`
+    select text, kind, skill
+    from requirements
+    where job_id = ${job.id}
+    order by created_at
+  `;
+
+  return {
+    id: job.id as string,
+    rawJd: job.rawJd as string,
+    company: job.company,
+    position: job.position,
+    deadline: job.deadline,
+    ...(toJobDetails(job) as JobDetails),
+    requirements: rows as Requirement[],
+  };
+}
+
 export async function saveJob(
   userId: string,
   rawJd: string,
